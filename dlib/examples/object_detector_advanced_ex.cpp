@@ -134,7 +134,7 @@ public:
         }
     }
 
-    inline unsigned long size () const { return feat_image.size(); }
+    inline size_t size () const { return feat_image.size(); }
     inline long nr () const { return feat_image.nr(); }
     inline long nc () const { return feat_image.nc(); }
 
@@ -179,7 +179,7 @@ public:
     inline friend void serialize   ( const very_simple_feature_extractor& item, std::ostream& out)  { serialize(item.feat_image, out); }
     inline friend void deserialize ( very_simple_feature_extractor& item, std::istream& in ) { deserialize(item.feat_image, in); }
 
-    void copy_configuration ( const very_simple_feature_extractor& item){}
+    void copy_configuration ( const very_simple_feature_extractor&){}
 
 private:
     array2d<unsigned char> feat_image;

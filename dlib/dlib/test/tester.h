@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <string>
-#include <dlib/map.h>
+#include <map>
 #include <dlib/logger.h>
 #include <dlib/assert.h>
 #include <dlib/algs.h>
@@ -17,10 +17,10 @@
 #endif
 
 
-#define DLIB_TEST(_exp) check_test(_exp, __LINE__, __FILE__, #_exp);
+#define DLIB_TEST(_exp) check_test(bool(_exp), __LINE__, __FILE__, #_exp)
 
 #define DLIB_TEST_MSG(_exp,_message)                                        \
-    {increment_test_count(); if ( !(_exp) )                                 \
+    do{increment_test_count(); if ( !(_exp) )                                 \
     {                                                                       \
         std::ostringstream dlib_o_out;                                       \
         dlib_o_out << "\n\nError occurred at line " << __LINE__ << ".\n";    \
@@ -28,12 +28,12 @@
         dlib_o_out << "Failing expression was " << #_exp << ".\n";           \
         dlib_o_out << _message << "\n";                                      \
         throw dlib::error(dlib_o_out.str());                                 \
-    }}
+    }}while(0)
 
 namespace test
 {
     class tester;
-    typedef dlib::map<std::string,tester*>::kernel_1a_c map_of_testers;
+    using map_of_testers = std::map<std::string,tester*>;
 
     map_of_testers& testers (
     );
@@ -55,7 +55,7 @@ namespace test
 
 // -----------------------------------------------------------------------------
 
-    dlib::uint64 number_of_testing_statements_executed (
+    std::uint64_t number_of_testing_statements_executed (
     );
     /*!
         ensures

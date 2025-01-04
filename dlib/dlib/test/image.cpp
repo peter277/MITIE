@@ -10,6 +10,8 @@
 #include <dlib/image_io.h>
 #include <dlib/matrix.h>
 #include <dlib/rand.h>
+#include <dlib/compress_stream.h>
+#include <dlib/base64.h>
 
 #include "tester.h"
 
@@ -20,6 +22,67 @@ namespace
     using namespace std;
 
     logger dlog("test.image");
+
+    /*! Compile time tests !*/
+    struct not_a_pixel_type{};
+
+    static_assert(is_image_type<array2d<rgb_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<bgr_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<rgb_alpha_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<bgr_alpha_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<hsi_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<lab_pixel>>::value, "bad trait definition");
+
+    static_assert(is_image_type<array2d<char>>::value,           "bad trait definition");
+    static_assert(is_image_type<array2d<signed char>>::value,    "bad trait definition");
+    static_assert(is_image_type<array2d<unsigned char>>::value,  "bad trait definition");
+    static_assert(is_image_type<array2d<short>>::value,          "bad trait definition");
+    static_assert(is_image_type<array2d<unsigned short>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<int>>::value,            "bad trait definition");
+    static_assert(is_image_type<array2d<unsigned int>>::value,   "bad trait definition");
+    static_assert(is_image_type<array2d<long>>::value,           "bad trait definition");
+    static_assert(is_image_type<array2d<unsigned long>>::value,  "bad trait definition");
+    static_assert(is_image_type<array2d<int64>>::value,          "bad trait definition");
+    static_assert(is_image_type<array2d<uint64>>::value,         "bad trait definition");
+
+    static_assert(is_image_type<array2d<float>>::value,                      "bad trait definition");
+    static_assert(is_image_type<array2d<double>>::value,                     "bad trait definition");
+    static_assert(is_image_type<array2d<long double>>::value,                "bad trait definition");
+    static_assert(is_image_type<array2d<std::complex<float>>>::value,        "bad trait definition");
+    static_assert(is_image_type<array2d<std::complex<double>>>::value,       "bad trait definition");
+    static_assert(is_image_type<array2d<std::complex<long double>>>::value,  "bad trait definition");
+
+    static_assert(is_image_type<array2d<rgb_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<bgr_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<rgb_alpha_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<bgr_alpha_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<hsi_pixel>>::value, "bad trait definition");
+    static_assert(is_image_type<array2d<lab_pixel>>::value, "bad trait definition");
+
+    static_assert(is_image_type<matrix<char>>::value,           "bad trait definition");
+    static_assert(is_image_type<matrix<signed char>>::value,    "bad trait definition");
+    static_assert(is_image_type<matrix<unsigned char>>::value,  "bad trait definition");
+    static_assert(is_image_type<matrix<short>>::value,          "bad trait definition");
+    static_assert(is_image_type<matrix<unsigned short>>::value, "bad trait definition");
+    static_assert(is_image_type<matrix<int>>::value,            "bad trait definition");
+    static_assert(is_image_type<matrix<unsigned int>>::value,   "bad trait definition");
+    static_assert(is_image_type<matrix<long>>::value,           "bad trait definition");
+    static_assert(is_image_type<matrix<unsigned long>>::value,  "bad trait definition");
+    static_assert(is_image_type<matrix<int64>>::value,          "bad trait definition");
+    static_assert(is_image_type<matrix<uint64>>::value,         "bad trait definition");
+
+    static_assert(is_image_type<matrix<float>>::value,                      "bad trait definition");
+    static_assert(is_image_type<matrix<double>>::value,                     "bad trait definition");
+    static_assert(is_image_type<matrix<long double>>::value,                "bad trait definition");
+    static_assert(is_image_type<matrix<std::complex<float>>>::value,        "bad trait definition");
+    static_assert(is_image_type<matrix<std::complex<double>>>::value,       "bad trait definition");
+    static_assert(is_image_type<matrix<std::complex<long double>>>::value,  "bad trait definition");
+
+    static_assert(!is_image_type<not_a_pixel_type>::value,          "bad trait definition");
+    static_assert(!is_image_type<rgb_pixel>::value,                 "bad trait definition");
+    static_assert(!is_image_type<std::vector<rgb_pixel>>::value,    "bad trait definition");
+    static_assert(!is_image_type<array2d<not_a_pixel_type>>::value, "bad trait definition");
+    static_assert(!is_image_type<matrix<not_a_pixel_type>>::value,  "bad trait definition");
 
 
     void image_test (
@@ -180,7 +243,7 @@ namespace
                     img[r][c].alpha = static_cast<unsigned char>(r*14 + c + 4);
                 }
             }
-
+        
             save_png(img, "test.png");
 
             img.clear();
@@ -212,9 +275,123 @@ namespace
                 }
             }
         }
+        {
+            matrix<rgb_alpha_pixel> img;
+            matrix<rgb_pixel> img2, img3;
+            img.set_size(14,15);
+            img2.set_size(img.nr(),img.nc());
+            img3.set_size(img.nr(),img.nc());
+            for (long r = 0; r < 14; ++r)
+            {
+                for (long c = 0; c < 15; ++c)
+                {
+                    img(r,c).red = static_cast<unsigned char>(r*14 + c + 1);
+                    img(r,c).green = static_cast<unsigned char>(r*14 + c + 2);
+                    img(r,c).blue = static_cast<unsigned char>(r*14 + c + 3);
+                    img(r,c).alpha = static_cast<unsigned char>(r*14 + c + 4);
+                }
+            }
+
+            save_png(img, "test.png");
+
+            img.set_size(0,0);
+            DLIB_TEST(img.nr() == 0);
+            DLIB_TEST(img.nc() == 0);
+
+            load_png(img, "test.png");
+            
+            DLIB_TEST(img.nr() == 14);
+            DLIB_TEST(img.nc() == 15);
+
+            assign_all_pixels(img2, 255);
+            assign_all_pixels(img3, 0);
+            load_png(img2, "test.png");
+            assign_image(img3, img);
+
+            for (long r = 0; r < 14; ++r)
+            {
+                for (long c = 0; c < 15; ++c)
+                {
+                    DLIB_TEST(img(r,c).red == r*14 + c + 1);
+                    DLIB_TEST(img(r,c).green == r*14 + c + 2);
+                    DLIB_TEST(img(r,c).blue == r*14 + c + 3);
+                    DLIB_TEST(img(r,c).alpha == r*14 + c + 4);
+
+                    DLIB_TEST(img2(r,c).red == img3(r,c).red);
+                    DLIB_TEST(img2(r,c).green == img3(r,c).green);
+                    DLIB_TEST(img2(r,c).blue == img3(r,c).blue);
+                }
+            }
+        }
+        {
+            const auto test_savers = [](const auto& img1)
+            {
+                const auto test_pixels = [](const auto& img1, const auto& img2)
+                {
+                    DLIB_TEST(img1.nr() == img2.nr());
+                    DLIB_TEST(img1.nc() == img2.nc());
+
+                    for (long r = 0; r < img1.nr(); ++r)
+                    {
+                        for (long c = 0; c < img1.nc(); ++c)
+                        {
+                            DLIB_TEST(img1[r][c].red   == r*14 + c + 1);
+                            DLIB_TEST(img1[r][c].green == r*14 + c + 2);
+                            DLIB_TEST(img1[r][c].blue  == r*14 + c + 3);
+
+                            DLIB_TEST(img1[r][c].red   == img2[r][c].red);
+                            DLIB_TEST(img1[r][c].green == img2[r][c].green);
+                            DLIB_TEST(img1[r][c].blue  == img2[r][c].blue);
+                        }
+                    }
+                };
+
+                using image_type = std::decay_t<decltype(img1)>;
+
+                const std::string    file_name = "test.png";
+                std::ostringstream   out;
+                std::vector<char>    buf1;
+                std::vector<int8_t>  buf2;
+                std::vector<uint8_t> buf3;
+
+                save_png(img1, file_name);
+                save_png(img1, out); 
+                save_png(img1, buf1);
+                save_png(img1, buf2);
+                save_png(img1, buf3);
+                std::istringstream in(out.str());
+
+                image_type img2, img3, img4, img5, img6;
+                load_png(img2, file_name);
+                load_png(img3, in);
+                load_png(img4, (const char*)buf1.data(), buf1.size());
+                load_png(img5, (const char*)buf1.data(), buf1.size());
+                load_png(img6, (const char*)buf1.data(), buf1.size());
+                test_pixels(img1, img2);
+                test_pixels(img1, img3);
+                test_pixels(img1, img4);
+                test_pixels(img1, img5);
+                test_pixels(img1, img6);
+            };
+
+            array2d<rgb_pixel> img1(14,15);
+            array2d<bgr_pixel> img2(14,15);
+
+            for (long r = 0; r < 14; ++r)
+            {
+                for (long c = 0; c < 15; ++c)
+                {
+                    img1[r][c].red   = static_cast<unsigned char>(r*14 + c + 1);
+                    img1[r][c].green = static_cast<unsigned char>(r*14 + c + 2);
+                    img1[r][c].blue  = static_cast<unsigned char>(r*14 + c + 3);
+                }
+            }
+
+            assign_image(img2, img1);
+            test_savers(img1);
+            test_savers(img2);
+        }
 #endif // DLIB_PNG_SUPPORT
-
-
 
         {
             array2d<rgb_pixel> img;
@@ -789,7 +966,7 @@ namespace
         border_enumerator be(get_rect(imout),rect);
         while (be.move_next())
         {
-            DLIB_TEST(imout[be.element().y()][be.element().x()] == 0)
+            DLIB_TEST(imout[be.element().y()][be.element().x()] == 0);
         }
         DLIB_TEST_MSG(max(abs(subm(mat(imout),rect) - subm(out,rect))) < 1e-5, max(abs(subm(mat(imout),rect) - subm(out,rect))));
 
@@ -800,7 +977,7 @@ namespace
         be = border_enumerator(get_rect(imout),rect);
         while (be.move_next())
         {
-            DLIB_TEST(imout[be.element().y()][be.element().x()] == 10)
+            DLIB_TEST(imout[be.element().y()][be.element().x()] == 10);
         }
         out += abs(xcorr_same(mat(img),filt)/2);
         DLIB_TEST(max(abs(subm(mat(imout),rect) - subm(out,rect))) < 1e-7);
@@ -812,7 +989,7 @@ namespace
         be = border_enumerator(get_rect(imout),rect);
         while (be.move_next())
         {
-            DLIB_TEST(imout[be.element().y()][be.element().x()] == -10)
+            DLIB_TEST(imout[be.element().y()][be.element().x()] == -10);
         }
         out += xcorr_same(mat(img),filt)/2;
         DLIB_TEST_MSG(max(abs(subm(mat(imout),rect) - subm(out,rect))) < 1e-5, max(abs(subm(mat(imout),rect) - subm(out,rect))));
@@ -1754,6 +1931,23 @@ namespace
                 << " error: " << max(abs(chip-255)) );
         }
 
+        // So the same as above, but for an image with float values that are all the same to make
+        // sure noting funny happens for float images.
+        {
+            print_spinner();
+            const long nr = 53;
+            const long nc = 67;
+            const long size = 8*9;
+            const double angle = 30*pi/180;
+
+            matrix<float> img(501,501), chip;
+            img = 1234.5;
+            chip_details details(centered_rect(center(get_rect(img)),nr,nc), size, angle);
+            extract_image_chip(img, details, chip);
+            DLIB_TEST_MSG(max(abs(chip-1234.5))==0,"nr: " << nr << "  nc: "<< nc << "  size: " << size << "  angle: " << angle 
+                << " error: " << max(abs(chip-255)) );
+        }
+
 
         {
             // Make sure that the interpolation in extract_image_chip() keeps stuff in the
@@ -1810,6 +2004,596 @@ namespace
             DLIB_TEST(length((line.first+line.second)/2.0 - center(get_rect(temp))) <= 1);
         }
 
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    template <
+        typename image_type
+        >
+    typename pixel_traits<typename image_traits<image_type>::pixel_type>::basic_pixel_type 
+    simple_partition_pixels (
+        const image_type& img
+    ) 
+    {
+        matrix<unsigned long,1> hist;
+        get_histogram(img,hist);
+
+        auto average1 = [&](unsigned long thresh)
+        {
+            double accum = 0;
+            double cnt = 0;
+            for (unsigned long i = 0; i < thresh; ++i)
+            {
+                accum += hist(i)*i;
+                cnt += hist(i);
+            }
+
+            if (cnt != 0)
+                return accum/cnt;
+            else
+                return 0.0;
+        };
+
+        auto average2 = [&](unsigned long thresh)
+        {
+            double accum = 0;
+            double cnt = 0;
+            for (long i = thresh; i < hist.size(); ++i)
+            {
+                accum += hist(i)*i;
+                cnt += hist(i);
+            }
+
+            if (cnt != 0)
+                return accum/cnt;
+            else
+                return 0.0;
+        };
+
+
+        auto total_abs = [&](unsigned long thresh)
+        {
+            auto a = average1(thresh);
+            auto b = average2(thresh);
+
+            double score = 0;
+            for (long i = 0; i < hist.size(); ++i)
+            {
+                if (i < (long)thresh)
+                    score += std::abs(a-i)*hist(i);
+                else
+                    score += std::abs(b-i)*hist(i);
+            }
+            return score;
+        };
+
+
+        unsigned long thresh = 0;
+        double min_sad = total_abs(0);
+        for (long i = 1; i < hist.size(); ++i)
+        {
+            double sad = total_abs(i);
+            //cout << "TRUTH: i:" << i << "  total: "<< total_abs(i) << endl;
+            if (sad <= min_sad)
+            {
+                //cout << "CHANGE TRUTH: i:" << i << "  total: "<< total_abs(i)-min_sad << endl;
+                min_sad = sad;
+                thresh = i;
+            }
+        }
+
+        return thresh;
+    }
+
+    void test_partition_pixels()
+    {
+        matrix<unsigned char> img(4,7);
+
+        dlib::rand rnd;
+        for (int round = 0; round < 100; ++round)
+        {
+            print_spinner();
+            for (auto& p : img)
+                p = rnd.get_random_8bit_number();
+
+            DLIB_TEST(simple_partition_pixels(img) == partition_pixels(img));
+            unsigned char thresh;
+            impl::partition_pixels_float(img,thresh);
+            DLIB_TEST(simple_partition_pixels(img) == thresh);
+
+            matrix<float> fimg = matrix_cast<float>(img);
+            DLIB_TEST(simple_partition_pixels(img) == partition_pixels(fimg));
+
+
+            std::vector<unsigned char> tmp;
+            for (auto& v : img)
+                if (v >= thresh)
+                    tmp.push_back(v);
+            matrix<unsigned char> img2 = mat(tmp);
+            unsigned char thresh2;
+            impl::partition_pixels_float(img,thresh, thresh2);
+            DLIB_TEST(simple_partition_pixels(img) == thresh);
+            DLIB_TEST(simple_partition_pixels(img2) == thresh2);
+
+            partition_pixels(img,thresh, thresh2);
+            DLIB_TEST(simple_partition_pixels(img) == thresh);
+            DLIB_TEST(simple_partition_pixels(img2) == thresh2);
+
+
+
+            std::vector<float> ftmp;
+            for (auto& v : fimg)
+                if (v >= thresh)
+                    ftmp.push_back(v);
+            matrix<float> fimg2 = mat(ftmp);
+            float fthresh, fthresh2;
+            partition_pixels(fimg,fthresh, fthresh2);
+            DLIB_TEST(simple_partition_pixels(img) == fthresh);
+            DLIB_TEST(simple_partition_pixels(img2) == fthresh2);
+        }
+
+
+        img.set_size(245,123);
+        for (int round = 0; round < 100; ++round)
+        {
+            print_spinner();
+            for (auto& p : img)
+                p = rnd.get_random_8bit_number();
+
+            DLIB_TEST(simple_partition_pixels(img) == partition_pixels(img));
+            unsigned char thresh;
+            impl::partition_pixels_float(img,thresh);
+            DLIB_TEST(simple_partition_pixels(img) == thresh);
+
+            matrix<float> fimg = matrix_cast<float>(img);
+            DLIB_TEST(simple_partition_pixels(img) == partition_pixels(fimg));
+
+
+
+
+            std::vector<unsigned char> tmp;
+            for (auto& v : img)
+                if (v >= thresh)
+                    tmp.push_back(v);
+            matrix<unsigned char> img2 = mat(tmp);
+            unsigned char thresh2;
+            impl::partition_pixels_float(img,thresh, thresh2);
+            DLIB_TEST(simple_partition_pixels(img) == thresh);
+            DLIB_TEST(simple_partition_pixels(img2) == thresh2);
+
+            partition_pixels(img,thresh, thresh2);
+            DLIB_TEST(simple_partition_pixels(img) == thresh);
+            DLIB_TEST(simple_partition_pixels(img2) == thresh2);
+
+
+
+            std::vector<float> ftmp;
+            for (auto& v : fimg)
+                if (v >= thresh)
+                    ftmp.push_back(v);
+            matrix<float> fimg2 = mat(ftmp);
+            float fthresh, fthresh2;
+            partition_pixels(fimg,fthresh, fthresh2);
+            DLIB_TEST(simple_partition_pixels(img) == fthresh);
+            DLIB_TEST(simple_partition_pixels(img2) == fthresh2);
+
+        }
+    }
+
+    template<typename interpolation_type = interpolate_bilinear>
+    void test_resize_image_with_interpolation()
+    {
+        {
+            matrix<unsigned char> img_s(2, 2);
+            matrix<unsigned char> img_d(3, 3);
+
+            img_s(0, 0) = 0;
+            img_s(0, 1) = 100;
+            img_s(1, 0) = 100;
+            img_s(1, 1) = 100;
+
+            resize_image(img_s, img_d, interpolation_type());
+            DLIB_TEST((img_d(0, 0) == 0));
+            DLIB_TEST((img_d(0, 1) == 50));
+            DLIB_TEST((img_d(1, 2) == 100));
+            DLIB_TEST((img_d(2, 2) == 100));
+        }
+
+        {
+            matrix<rgb_pixel> img_s(2, 2);
+            matrix<rgb_pixel> img_d(3, 3);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 10, 20, 30 };
+            img_s(1, 0) = { 10, 20, 30 };
+            img_s(1, 1) = { 10, 20, 30 };
+
+            resize_image(img_s, img_d, interpolation_type());
+            DLIB_TEST((img_d(0, 0) == rgb_pixel{ 0, 0, 0 }));
+            DLIB_TEST((img_d(0, 1) == rgb_pixel{ 5, 10, 15 }));
+            DLIB_TEST((img_d(1, 2) == rgb_pixel{ 10, 20, 30 }));
+            DLIB_TEST((img_d(2, 2) == rgb_pixel{ 10, 20, 30 }));
+        }
+
+        {
+            matrix<lab_pixel> img_s(2, 2);
+            matrix<lab_pixel> img_d(3, 3);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 100, 20, 30 };
+            img_s(1, 0) = { 100, 20, 30 };
+            img_s(1, 1) = { 100, 20, 30 };
+
+            resize_image(img_s, img_d, interpolation_type());
+            DLIB_TEST((img_d(0, 0) == lab_pixel{ 0, 0, 0 }));
+            DLIB_TEST((img_d(0, 1) == lab_pixel{ 50, 10, 15 }));
+            DLIB_TEST((img_d(1, 2) == lab_pixel{ 100, 20, 30 }));
+            DLIB_TEST((img_d(2, 2) == lab_pixel{ 100, 20, 30 }));
+        }
+
+    }
+
+    void test_null_rotate_image_with_interpolation()
+    {
+        {
+            matrix<unsigned char> img_s(3, 3);
+            matrix<unsigned char> img_d;
+
+            img_s(0, 0) = 0;
+            img_s(0, 1) = 100;
+            img_s(0, 2) = 100;
+            img_s(1, 0) = 100;
+            img_s(1, 1) = 100;
+            img_s(1, 2) = 100;
+            img_s(2, 0) = 100;
+            img_s(2, 1) = 100;
+            img_s(2, 2) = 100;
+
+            rotate_image(img_s, img_d, 0, interpolate_bilinear());
+            DLIB_TEST((img_d(0, 0) == 0));
+            DLIB_TEST((img_d(0, 1) == 100));
+            DLIB_TEST((img_d(1, 0) == 100));
+            DLIB_TEST((img_d(1, 1) == 100));
+        }
+
+        {
+            matrix<rgb_pixel> img_s(3, 3);
+            matrix<rgb_pixel> img_d(3, 3);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 10, 20, 30 };
+            img_s(0, 2) = { 10, 20, 30 };
+            img_s(1, 0) = { 10, 20, 30 };
+            img_s(1, 1) = { 10, 20, 30 };
+            img_s(1, 2) = { 10, 20, 30 };
+            img_s(2, 0) = { 10, 20, 30 };
+            img_s(2, 1) = { 10, 20, 30 };
+            img_s(2, 2) = { 10, 20, 30 };
+
+            rotate_image(img_s, img_d, 0, interpolate_bilinear());
+            DLIB_TEST((img_d(0, 0) == rgb_pixel{ 0, 0, 0 }));
+            DLIB_TEST((img_d(0, 1) == rgb_pixel{ 10, 20, 30 }));
+            DLIB_TEST((img_d(1, 0) == rgb_pixel{ 10, 20, 30 }));
+            DLIB_TEST((img_d(1, 1) == rgb_pixel{ 10, 20, 30 }));
+        }
+
+        {
+            matrix<lab_pixel> img_s(3, 3);
+            matrix<lab_pixel> img_d(3, 3);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 100, 20, 30 };
+            img_s(0, 2) = { 100, 20, 30 };
+            img_s(1, 0) = { 100, 20, 30 };
+            img_s(1, 1) = { 100, 20, 30 };
+            img_s(1, 2) = { 100, 20, 30 };
+            img_s(2, 0) = { 100, 20, 30 };
+            img_s(2, 1) = { 100, 20, 30 };
+            img_s(2, 2) = { 100, 20, 30 };
+
+            rotate_image(img_s, img_d, 0, interpolate_bilinear());
+            DLIB_TEST((img_d(0, 0) == lab_pixel{ 0, 0, 0 }));
+            DLIB_TEST((img_d(0, 1) == lab_pixel{ 100, 20, 30 }));
+            DLIB_TEST((img_d(1, 0) == lab_pixel{ 100, 20, 30 }));
+            DLIB_TEST((img_d(1, 1) == lab_pixel{ 100, 20, 30 }));
+        }
+
+    }
+
+    void test_null_rotate_image_with_interpolation_quadratic()
+    {
+        {
+            matrix<unsigned char> img_s(3, 3);
+            matrix<unsigned char> img_d;
+
+            img_s(0, 0) = 0;
+            img_s(0, 1) = 100;
+            img_s(0, 2) = 100;
+            img_s(1, 0) = 100;
+            img_s(1, 1) = 100;
+            img_s(1, 2) = 100;
+            img_s(2, 0) = 100;
+            img_s(2, 1) = 100;
+            img_s(2, 2) = 100;
+
+            rotate_image(img_s, img_d, 0, interpolate_quadratic());
+            DLIB_TEST((img_d(1, 1) == 111));
+        }
+
+        {
+            matrix<rgb_pixel> img_s(3, 3);
+            matrix<rgb_pixel> img_d(3, 3);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 10, 20, 30 };
+            img_s(0, 2) = { 10, 20, 30 };
+            img_s(1, 0) = { 10, 20, 30 };
+            img_s(1, 1) = { 10, 20, 30 };
+            img_s(1, 2) = { 10, 20, 30 };
+            img_s(2, 0) = { 10, 20, 30 };
+            img_s(2, 1) = { 10, 20, 30 };
+            img_s(2, 2) = { 10, 20, 30 };
+
+            rotate_image(img_s, img_d, 0, interpolate_quadratic());
+            DLIB_TEST((img_d(1, 1) == rgb_pixel{ 11, 22, 33 }));
+        }
+
+        {
+            matrix<lab_pixel> img_s(3, 3);
+            matrix<lab_pixel> img_d(3, 3);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 100, 20, 30 };
+            img_s(0, 2) = { 100, 20, 30 };
+            img_s(1, 0) = { 100, 20, 30 };
+            img_s(1, 1) = { 100, 20, 30 };
+            img_s(1, 2) = { 100, 20, 30 };
+            img_s(2, 0) = { 100, 20, 30 };
+            img_s(2, 1) = { 100, 20, 30 };
+            img_s(2, 2) = { 100, 20, 30 };
+
+            rotate_image(img_s, img_d, 0, interpolate_quadratic());
+            DLIB_TEST((img_d(1, 1) == lab_pixel{ 111, 22, 33 }));
+        }
+    }
+
+    void test_interpolate_bilinear()
+    {
+        {
+            matrix<unsigned char> img_s(2, 2);
+
+            img_s(0, 0) = 0;
+            img_s(0, 1) = 100;
+            img_s(1, 0) = 100;
+            img_s(1, 1) = 100;
+
+            const_image_view<matrix<unsigned char>> imgv(img_s);
+
+            unsigned char result;
+            {
+                interpolate_bilinear()(imgv, dlib::vector<double, 2>{ 0.5, 0.0 }, result);
+                DLIB_TEST(result == 50);
+            }
+            {
+                interpolate_bilinear()(imgv, dlib::vector<double, 2>{ 0.5, 0.5 }, result);
+                DLIB_TEST(result == 75);
+            }
+        }
+
+        {
+            matrix<rgb_pixel> img_s(2, 2);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 10, 20, 30 };
+            img_s(1, 0) = { 10, 20, 30 };
+            img_s(1, 1) = { 10, 20, 30 };
+
+            const_image_view<matrix<rgb_pixel>> imgv(img_s);
+
+            rgb_pixel result;
+            {
+                interpolate_bilinear()(imgv, dlib::vector<double, 2>{ 0.5, 0.0 }, result);
+                DLIB_TEST(result.red == 5);
+                DLIB_TEST(result.green == 10);
+                DLIB_TEST(result.blue == 15);
+            }
+            {
+                interpolate_bilinear()(imgv, dlib::vector<double, 2>{ 0.5, 0.5 }, result);
+                DLIB_TEST(result.red == 7);
+                DLIB_TEST(result.green == 15);
+                DLIB_TEST(result.blue == 22);
+            }
+        }
+
+        {
+            matrix<lab_pixel> img_s(2, 2);
+
+            img_s(0, 0) = { 0, 0, 0 };
+            img_s(0, 1) = { 100, 20, 30 };
+            img_s(1, 0) = { 100, 20, 30 };
+            img_s(1, 1) = { 100, 20, 30 };
+
+            const_image_view<matrix<lab_pixel>> imgv(img_s);
+
+            lab_pixel result;
+            {
+                interpolate_bilinear()(imgv, dlib::vector<double, 2>{ 0.5, 0.0 }, result);
+                DLIB_TEST(result.l == 50);
+                DLIB_TEST(result.a == 10);
+                DLIB_TEST(result.b == 15);
+            }
+            {
+                interpolate_bilinear()(imgv, dlib::vector<double, 2>{ 0.5, 0.5 }, result);
+                DLIB_TEST(result.l == 75);
+                DLIB_TEST(result.a == 15);
+                DLIB_TEST(result.b == 22);
+            }
+        }
+    }
+
+    void test_letterbox_image()
+    {
+        print_spinner();
+        rgb_pixel black(0, 0, 0);
+        rgb_pixel white(255, 255, 255);
+        matrix<rgb_pixel> img_s(40, 60);
+        matrix<rgb_pixel> img_d(30, 30);
+        assign_all_pixels(img_s, white);
+        const auto tform = letterbox_image(img_s, img_d, interpolate_nearest_neighbor());
+        DLIB_TEST(tform.get_m() == identity_matrix<double>(2) * 0.5);
+        DLIB_TEST(tform.get_b() == dpoint(0, 5));
+
+        // manually generate the target image
+        matrix<rgb_pixel> img_t(30, 30);
+        assign_all_pixels(img_t, rgb_pixel(0, 0, 0));
+        matrix<rgb_pixel> img_w(20, 30);
+        assign_all_pixels(img_w, rgb_pixel(255, 255, 255));
+        rectangle r (0, 5, 30 - 1, 25 - 1);
+        auto si = sub_image(img_t, r);
+        assign_image(si, img_w);
+        DLIB_TEST(img_d == img_t);
+    }
+
+    void test_draw_string()
+    {
+        print_spinner();
+        matrix<rgb_pixel> image{48, 48};
+        assign_all_pixels(image, rgb_pixel{0, 0, 0});
+        draw_string(image, point{10, 15}, string{"cat"}, rgb_pixel{255, 255, 255});
+
+        matrix<rgb_pixel> result;
+        const std::string data{"gQgLudERwR0JqP9kUiitFNDYSO9rdZzdmeDmricAlM5f5RBqzTlaW6Lp704mTXJq/WXHTQ84wWnGAA=="};
+        ostringstream sout;
+        istringstream sin;
+        base64 base64_coder;
+        compress_stream::kernel_1ea compressor;
+        sin.str(data);
+        base64_coder.decode(sin, sout);
+        sin.clear();
+        sin.str(sout.str());
+        sout.clear();
+        sout.str("");
+        compressor.decompress(sin, sout);
+        sin.clear();
+        sin.str(sout.str());
+        deserialize(result, sin);
+        DLIB_TEST(image == result);
+    }
+
+    template <typename pixel_type>
+    double avg_pixel_delta(const matrix<pixel_type>& img1, const matrix<pixel_type>& img2)
+    {
+        DLIB_TEST(have_same_dimensions(img1, img2));
+
+        double delta = 0;
+        double size = 0;
+        for (long r = 0; r < img1.nr(); ++r) 
+        {
+            for (long c = 0; c < img1.nc(); ++c) 
+            {
+                const auto p1 = pixel_to_vector<double>(img1(r,c));
+                const auto p2 = pixel_to_vector<double>(img2(r,c));
+
+                const bool has_alpha = p1.size() == 4;
+                // We are using the default WebP settings, which means 'exact' is disabled.
+                // RGB values in transparent areas will be modified to improve compression.
+                // As a result, we skip matching transparent pixels.
+                if (has_alpha && p1(3) == 0 && p2(3) == 0) continue;
+
+                delta += sum(abs(p1-p2));
+                size += p1.size();
+            }
+        }
+        return delta / size;
+    }
+
+    void test_webp()
+    {
+#ifdef DLIB_WEBP_SUPPORT
+    print_spinner();
+    matrix<rgb_pixel> rgb_img, rgb_dec;
+    matrix<rgb_alpha_pixel> rgba_img, rgba_dec;
+    matrix<bgr_pixel> bgr_img, bgr_dec;
+    matrix<bgr_alpha_pixel> bgra_img, bgra_dec;
+    // this is a matrix<rgb_alpha_pixel> of the 32x32 dlib logo
+    const std::string data{
+        "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"
+    };
+        ostringstream sout;
+        istringstream sin;
+        base64 base64_coder;
+        compress_stream::kernel_1ea compressor;
+        sin.str(data);
+        base64_coder.decode(sin, sout);
+        sin.clear();
+        sin.str(sout.str());
+        sout.clear();
+        sout.str("");
+        compressor.decompress(sin, sout);
+        sin.clear();
+        sin.str(sout.str());
+        deserialize(rgba_img, sin);
+        for (auto quality : {75., 101.})
+        {
+            save_webp(rgba_img, "test_rgba.webp", quality);
+            load_webp(rgba_dec, "test_rgba.webp");
+            if (quality > 100)
+                DLIB_TEST(avg_pixel_delta(rgba_img, rgba_dec) == 0);
+            else
+                DLIB_TEST(avg_pixel_delta(rgba_img, rgba_dec) < 7);
+
+            assign_image(bgra_img, rgba_img);
+            save_webp(bgra_img, "test_bgra.webp", quality);
+            load_webp(bgra_dec, "test_bgra.webp");
+            if (quality > 100)
+                DLIB_TEST(avg_pixel_delta(bgra_img, bgra_dec) == 0);
+            else
+                DLIB_TEST(avg_pixel_delta(bgra_img, bgra_dec) < 7);
+
+            rgb_img.set_size(rgba_img.nr(), rgba_img.nc());
+            rgb_img = rgb_pixel(0,0,0);
+            assign_image(rgb_img, rgba_img);
+            save_webp(rgb_img, "test_rgb.webp", quality);
+            load_webp(rgb_dec, "test_rgb.webp");
+            if (quality > 100)
+                DLIB_TEST(avg_pixel_delta(rgb_img, rgb_dec) == 0);
+            else
+                DLIB_TEST(avg_pixel_delta(rgb_img, rgb_dec) < 7);
+
+            assign_image(bgr_img, rgb_img);
+            save_webp(bgr_img, "test_bgr.webp", quality);
+            load_webp(bgr_dec, "test_bgr.webp");
+            if (quality > 100)
+                DLIB_TEST(avg_pixel_delta(bgr_img, bgr_dec) == 0);
+            else
+                DLIB_TEST(avg_pixel_delta(bgr_img, bgr_dec) < 7);
+        }
+#endif
     }
 
 // ----------------------------------------------------------------------------------------
@@ -1894,6 +2678,30 @@ namespace
                 draw_line(img, point(20,19), point(59,19), 00);
                 DLIB_TEST(sum(matrix_cast<int>(mat(img))) == 0);
             }
+
+            {
+                matrix<int> a(3,4);
+                array2d<unsigned char> b(3,4);
+                DLIB_TEST(have_same_dimensions(a,b));
+            }
+
+            {
+                matrix<int> a(4,4);
+                array2d<unsigned char> b(3,4);
+                DLIB_TEST(!have_same_dimensions(a,b));
+
+                static_assert(is_image_type<matrix<int>>::value, "should be true");
+                static_assert(!is_image_type<int>::value, "should be false");
+            }
+
+            test_partition_pixels();
+            test_resize_image_with_interpolation<interpolate_bilinear>();
+            test_null_rotate_image_with_interpolation();
+            test_null_rotate_image_with_interpolation_quadratic();
+            test_interpolate_bilinear();
+            test_letterbox_image();
+            test_draw_string();
+            test_webp();
         }
     } a;
 

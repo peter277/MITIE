@@ -10,14 +10,19 @@
 # will be to learn to identify person names.  Once we have our segmentation
 # model we can use it to find names in new sentences, as we will show.
 #
-# COMPILING THE DLIB PYTHON INTERFACE
-#   Dlib comes with a compiled python interface for python 2.7 on MS Windows. If
-#   you are using another python version or operating system then you need to
-#   compile the dlib python interface before you can use this file.  To do this,
-#   run compile_dlib_python_module.bat.  This should work on any operating
-#   system so long as you have CMake and boost-python installed.
-#   On Ubuntu, this can be done easily by running the command:
-#       sudo apt-get install libboost-python-dev cmake
+# COMPILING/INSTALLING THE DLIB PYTHON INTERFACE
+#   You can install dlib using the command:
+#       pip install dlib
+#
+#   Alternatively, if you want to compile dlib yourself then go into the dlib
+#   root folder and run:
+#       python setup.py install
+#
+#   Compiling dlib should work on any operating system so long as you have
+#   CMake installed.  On Ubuntu, this can be done easily by running the
+#   command:
+#       sudo apt-get install cmake
+#
 import sys
 import dlib
 

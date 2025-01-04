@@ -4,6 +4,8 @@
 #define DLIB_GeNERIC_IMAGE_Hh_
 
 #include "../assert.h"
+#include "../pixel.h"
+#include <type_traits>
 
 namespace dlib
 {
@@ -128,6 +130,64 @@ namespace dlib
                 image_traits<image_type>::pixel_type
     !*/
 
+    /*!A pixel_type_t 
+        An alias for the type of pixel in an image.
+    !*/
+    template <typename image_type>
+    using pixel_type_t = typename image_traits<image_type>::pixel_type;
+
+    /*!A is_rgb_image
+        A type traits class telling you if a type is an image holding RGB pixels.
+    !*/
+    template <typename image_type>
+    struct is_rgb_image { const static bool value = pixel_traits<pixel_type_t<image_type>>::rgb; };
+
+    /*!A is_color_space_cartesian_image
+        A type traits class telling you if a type is an image holding some type of cartesian pixel type.
+
+        E.g. as contrasted with polar coordinates pixel types.
+    !*/
+    template <typename image_type>
+    struct is_color_space_cartesian_image { const static bool value = 
+        pixel_traits<pixel_type_t<image_type>>::rgb || 
+        pixel_traits<pixel_type_t<image_type>>::lab || 
+        pixel_traits<pixel_type_t<image_type>>::grayscale; };
+
+    /*!A is_grayscale_image
+        A type traits class telling you if a type is an image holding a single channel (i.e.
+        grayscale) pixel type.
+    !*/
+    template <typename image_type>
+    struct is_grayscale_image { const static bool value = pixel_traits<pixel_type_t<image_type>>::grayscale; };
+
+// ----------------------------------------------------------------------------------------
+
+    namespace details
+    {
+        template<class Container, class Alwaysvoid = void>
+        struct is_image_type : std::false_type{};
+
+        template<class Container>
+        struct is_image_type<Container, dlib::void_t<is_pixel_check<pixel_type_t<Container>>>> : std::true_type{};
+    }
+
+    /*!A is_image_type 
+
+        A type traits struct telling you if Container satisfies the generic image interface.
+
+        i.e. there exists an image_traits<> specialization and the underlying pixel type has a pixel_trait<> specialiation
+        e.g. array2d<rgb_pixel>, matrix<float>, etc...
+    !*/
+    template<class Container>
+    using is_image_type = details::is_image_type<Container>;
+
+    /*!A is_image_check
+
+        This is a SFINAE tool for restricting a template to only image types.
+    !*/
+    template<class Container>
+    using is_image_check = std::enable_if_t<is_image_type<Container>::value, bool>;
+
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 //                   UTILITIES TO MAKE ACCESSING IMAGE PIXELS SIMPLER
@@ -166,12 +226,12 @@ namespace dlib
         !*/
 
     public:
-        typedef typename image_traits<image_type>::pixel_type pixel_type;
+        using pixel_type = pixel_type_t<image_type>;
 
         image_view(
             image_type& img
         ) : 
-            _data((char*)image_data(img)), 
+            _data(reinterpret_cast<char*>(image_data(img))), 
             _width_step(width_step(img)),
             _nr(num_rows(img)),
             _nc(num_columns(img)),
@@ -285,6 +345,8 @@ namespace dlib
                 - sets the image to have 0 pixels in it.
         !*/
 
+        long get_width_step() const { return _width_step; }
+
     private:
 
         char* _data;
@@ -310,12 +372,12 @@ namespace dlib
         !*/
 
     public:
-        typedef typename image_traits<image_type>::pixel_type pixel_type;
+        using pixel_type = pixel_type_t<image_type>;
 
         const_image_view(
             const image_type& img
         ) : 
-            _data((char*)image_data(img)), 
+            _data(reinterpret_cast<const char*>(image_data(img))), 
             _width_step(width_step(img)),
             _nr(num_rows(img)),
             _nc(num_columns(img))
@@ -354,6 +416,8 @@ namespace dlib
         }
 #endif
 
+        long get_width_step() const { return _width_step; }
+
     private:
         const char* _data;
         long _width_step;
@@ -384,6 +448,14 @@ namespace dlib
         ensures
             - constructs a const_image_view from an image object
     !*/
+
+
+    // Don't stack image views on image views since that's pointless and just slows the
+    // compilation.
+    template <typename T> image_view<T>&             make_image_view ( image_view<T>& img)             { return img; }
+    template <typename T> const image_view<T>&       make_image_view ( const image_view<T>& img)       { return img; }
+    template <typename T> const_image_view<T>&       make_image_view ( const_image_view<T>& img)       { return img; }
+    template <typename T> const const_image_view<T>& make_image_view ( const const_image_view<T>& img) { return img; }
 
 // ----------------------------------------------------------------------------------------
 
@@ -422,6 +494,95 @@ namespace dlib
               of columns in an image.  However, as stated at the top of this file, image
               objects should provide their own overload of num_rows() if needed.
     !*/
+
+    template <typename image_type1, typename image_type2>
+    typename std::enable_if<is_image_type<image_type1>::value&&is_image_type<image_type2>::value, bool>::type 
+    have_same_dimensions (
+        const image_type1& img1,
+        const image_type2& img2
+    ) { return num_rows(img1)==num_rows(img2) && num_columns(img1)==num_columns(img2); }
+    /*!
+        ensures
+            - returns true if and only if the two given images have the same dimensions.
+    !*/
+
+    template <typename image_type1, typename image_type2, typename ...T>
+    typename std::enable_if<is_image_type<image_type1>::value&&is_image_type<image_type2>::value, bool>::type 
+    have_same_dimensions (
+        const image_type1& img1,
+        const image_type2& img2,
+        T&& ...args
+    ) { return have_same_dimensions(img1,img2) && have_same_dimensions(img1,args...); }
+
+// ----------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
+//            Make the image views implement the generic image interface
+// ----------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
+
+    template <typename T>
+    struct image_traits<image_view<T>> { using pixel_type = pixel_type_t<T>; };
+
+    template <typename T>
+    struct image_traits<const image_view<T>> { using pixel_type = pixel_type_t<T>; };
+
+    template <typename T>
+    inline long num_rows( const image_view<T>& img) { return img.nr(); }
+    template <typename T>
+    inline long num_columns( const image_view<T>& img) { return img.nc(); }
+
+    template <typename T>
+    inline void set_image_size( image_view<T>& img, long rows, long cols ) { img.set_size(rows,cols); }
+
+    template <typename T>
+    inline void* image_data( image_view<T>& img)
+    {
+        if (img.size() != 0)
+            return &img[0][0];
+        else
+            return 0;
+    }
+
+    template <typename T>
+    inline const void* image_data(
+        const image_view<T>& img
+    )
+    {
+        if (img.size() != 0)
+            return &img[0][0];
+        else
+            return 0;
+    }
+
+    template <typename T>
+    inline long width_step( const image_view<T>& img) { return img.get_width_step(); }
+
+// ----------------------------------------------------------------------------------------
+
+    template <typename T>
+    struct image_traits<const_image_view<T>> {using pixel_type = pixel_type_t<T>; };
+
+    template <typename T>
+    struct image_traits<const const_image_view<T>> {using pixel_type = pixel_type_t<T>; };
+
+    template <typename T>
+    inline long num_rows( const const_image_view<T>& img) { return img.nr(); }
+    template <typename T>
+    inline long num_columns( const const_image_view<T>& img) { return img.nc(); }
+
+    template <typename T>
+    inline const void* image_data(
+        const const_image_view<T>& img
+    )
+    {
+        if (img.size() != 0)
+            return &img[0][0];
+        else
+            return 0;
+    }
+
+    template <typename T>
+    inline long width_step( const const_image_view<T>& img) { return img.get_width_step(); }
 
 // ----------------------------------------------------------------------------------------
 

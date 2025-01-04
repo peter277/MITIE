@@ -7,7 +7,6 @@
    <!-- ************************************************************************* -->
 
    <body>
-         <br/><br/>
          <p>
          Many of these containers were inspired by the work of the <a
            href="http://www.cse.ohio-state.edu/~weide/rsrg/index.html">Reusable
@@ -52,10 +51,6 @@
       <section>
          <name>Objects</name>
          <item>static_set</item> 
-         <item>any</item> 
-         <item>any_trainer</item> 
-         <item>any_function</item> 
-         <item>any_decision_function</item> 
          <item>array</item> 
          <item>array2d</item> 
          <item>binary_search_tree</item> 
@@ -78,15 +73,20 @@
          <item>circular_buffer</item>
          <item>tuple</item>
          <item>reference_wrapper</item>
-         
+         <item>optional</item>
       </section>
 
       <section>
-         <name>Smart Pointers</name>
-         <item>scoped_ptr</item>
-         <item>shared_ptr</item>
-         <item>shared_ptr_thread_safe</item>
-         <item>weak_ptr</item>
+         <name>Type Erasure</name>
+         <item>any</item> 
+         <item>any_trainer</item> 
+         <item>any_function</item> 
+         <item>any_decision_function</item> 
+         <item>storage_heap</item> 
+         <item>storage_stack</item> 
+         <item>storage_sbo</item> 
+         <item>storage_shared</item> 
+         <item>storage_view</item> 
       </section>
 
       <section>
@@ -486,29 +486,6 @@
    <!-- ************************************************************************* -->
 
       <component>
-         <name>weak_ptr</name>
-         <file>dlib/smart_pointers.h</file>
-         <spec_file>dlib/smart_pointers/weak_ptr_abstract.h</spec_file>
-         <description>
-            <p>
-                The weak_ptr class template stores a weak reference to an object that is 
-                already managed by a shared_ptr. To access the object, a weak_ptr can 
-                be converted to a shared_ptr using the member function lock().  
-            </p>
-
-            <p>
-                This is an implementation of the std::tr1::weak_ptr template from the 
-                document ISO/IEC PDTR 19768, Proposed Draft Technical Report on C++
-                Library Extensions.  The only deviation from that document is that this 
-                shared_ptr is declared inside the dlib namespace rather than std::tr1.
-            </p>
-         </description>
-               
-      </component>
-      
-   <!-- ************************************************************************* -->
-
-      <component>
          <name>type_safe_union</name>
          <file>dlib/type_safe_union.h</file>
          <spec_file link="true">dlib/type_safe_union/type_safe_union_kernel_abstract.h</spec_file>
@@ -539,6 +516,102 @@
                 an ordered list of two items like std::pair.  
          </description>
          
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>storage_heap</name>
+         <file>dlib/any.h</file>
+         <spec_file link="true">dlib/any/storage.h</spec_file>
+         <description>
+                This object is basically a type-safe version of a void*.  In particular,
+                it is a container which can contain only one object but the object may
+                be of any type.  Importantly, this container stores the object <b>on the 
+                heap</b>.
+
+               <p>
+                  This class is meant to be a lower level tool used to implement other 
+                  higher level containers or APIs that depend on type erasure.
+               </p>
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>storage_stack</name>
+         <file>dlib/any.h</file>
+         <spec_file link="true">dlib/any/storage.h</spec_file>
+         <description>
+                This object is basically a type-safe version of a void*.  In particular,
+                it is a container which can contain only one object but the object may
+                be of any type.  Importantly, this container stores the object <b>on the 
+                stack</b>.
+
+               <p>
+                  This class is meant to be a lower level tool used to implement other 
+                  higher level containers or APIs that depend on type erasure.
+               </p>
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>storage_sbo</name>
+         <file>dlib/any.h</file>
+         <spec_file link="true">dlib/any/storage.h</spec_file>
+         <description>
+                This object is basically a type-safe version of a void*.  In particular,
+                it is a container which can contain only one object but the object may
+                be of any type.  This container uses the <b>small buffer optimization</b>
+                to store small objects on the stack, but larger objects on the heap.
+
+               <p>
+                  This class is meant to be a lower level tool used to implement other 
+                  higher level containers or APIs that depend on type erasure.
+               </p>
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>storage_shared</name>
+         <file>dlib/any.h</file>
+         <spec_file link="true">dlib/any/storage.h</spec_file>
+         <description>
+                This object is basically a type-safe version of a void*.  In particular,
+                it is a container which can contain only one object but the object may
+                be of any type.  This container stores the object it contains in a <tt>std::shared_ptr</tt>,
+                and therefore has reference rather than value semantics, as well as storage on the heap.
+
+               <p>
+                  This class is meant to be a lower level tool used to implement other 
+                  higher level containers or APIs that depend on type erasure.
+               </p>
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>storage_view</name>
+         <file>dlib/any.h</file>
+         <spec_file link="true">dlib/any/storage.h</spec_file>
+         <description>
+                This object is basically a type-safe version of a void*.  In particular,
+                it is a container which can contain only one object but the object may
+                be of any type.  This container doesn't actually store the object it contains,
+                rather, it is a non-owning view of that object.  It therefore has reference
+                semantics just as a void* would.
+
+               <p>
+                  This class is meant to be a lower level tool used to implement other 
+                  higher level containers or APIs that depend on type erasure.
+               </p>
+         </description>
       </component>
       
    <!-- ************************************************************************* -->
@@ -621,45 +694,6 @@
       </component>
       
    <!-- ************************************************************************* -->
-      
-
-      <component>
-         <name>shared_ptr_thread_safe</name>
-         <file>dlib/smart_pointers_thread_safe.h</file>
-         <spec_file>dlib/smart_pointers/shared_ptr_thread_safe_abstract.h</spec_file>
-         <description>
-            <p>
-                This object represents a reference counted smart pointer just like 
-                <a href="#shared_ptr">shared_ptr</a> except that it is threadsafe.
-            </p>
-         </description>
-               
-      </component>
-      
-   <!-- ************************************************************************* -->
-      <component>
-         <name>shared_ptr</name>
-         <file>dlib/smart_pointers.h</file>
-         <spec_file>dlib/smart_pointers/shared_ptr_abstract.h</spec_file>
-         <description>
-            <p>
-                This object represents a reference counted smart pointer.  Each shared_ptr
-                contains a pointer to some object and when the last shared_ptr that points
-                to the object is destructed or reset() then the object is guaranteed to be 
-                deleted.
-            </p>
-
-            <p>
-                This is an implementation of the std::tr1::shared_ptr template from the 
-                document ISO/IEC PDTR 19768, Proposed Draft Technical Report on C++
-                Library Extensions.  The only deviation from that document is that this 
-                shared_ptr is declared inside the dlib namespace rather than std::tr1.
-            </p>
-         </description>
-               
-      </component>
-      
-   <!-- ************************************************************************* -->
 
       <component>
          <name>tuple</name>
@@ -700,22 +734,17 @@
    <!-- ************************************************************************* -->
 
       <component>
-         <name>scoped_ptr</name>
-         <file>dlib/smart_pointers.h</file>
-         <spec_file>dlib/smart_pointers/scoped_ptr_abstract.h</spec_file>
+         <name>optional</name>
+         <file>dlib/optional.h</file>
+         <spec_file>dlib/optional.h</spec_file>
          <description>
-                This is a implementation of the scoped_ptr class found in the Boost C++ 
-                library.  It is a simple smart pointer class which guarantees that the 
-                pointer contained within it will always be deleted.  
-                
-                The class does not permit copying and so does not do any kind of 
-                reference counting.  Thus it is very simple and quite fast.
+            This is a standard's compliant backport of <a href="https://en.cppreference.com/w/cpp/utility/optional">std::optional</a> 
+            that works with C++14.  It includes C++23 monadic interfaces
          </description>
-               
       </component>
       
    <!-- ************************************************************************* -->
-      
+
       <component checked="true">
          <name>graph</name>
          <file>dlib/graph.h</file>

@@ -26,7 +26,11 @@ namespace dlib
 
         circular_buffer()
         {
-            offset = 0;
+        }
+
+        explicit circular_buffer(unsigned long s)
+        {
+            resize(s);
         }
 
         void clear (
@@ -45,7 +49,10 @@ namespace dlib
                 << "\n\t i:      " << i 
                 << "\n\t size(): " << size()
             );
-            return data[(i+offset)%data.size()]; 
+            auto index = i + offset;
+            if (index >= data.size())
+                index -= data.size();
+            return data[index]; 
         }
 
         const T& operator[] ( unsigned long i) const 
@@ -57,7 +64,10 @@ namespace dlib
                 << "\n\t i:      " << i 
                 << "\n\t size(): " << size()
             );
-            return data[(i+offset)%data.size()]; 
+            auto index = i + offset;
+            if (index >= data.size())
+                index -= data.size();
+            return data[index];
         }
 
         void resize(unsigned long size) 
@@ -149,7 +159,7 @@ namespace dlib
     private:
         std::vector<T> data;
 
-        unsigned long offset;
+        unsigned long offset = 0;
     };
 
 // ----------------------------------------------------------------------------------------

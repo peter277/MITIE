@@ -11,13 +11,14 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, glob
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../../../python_examples'))
+for path in glob.glob('../../../build/lib.linux-*'):
+    sys.path.insert(0, os.path.abspath(path))
 
 import generate_dlib_listing
 generate_dlib_listing.make_listing_files()
@@ -244,3 +245,14 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+
+
+# Make sphinx document constructors and __call__
+def skip(app, what, name, obj, skip, options):
+    if name == "__init__" or name == "__call__":
+        return False
+    return skip
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)

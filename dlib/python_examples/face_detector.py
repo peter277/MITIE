@@ -20,32 +20,33 @@
 #   program.  
 #
 #
-# COMPILING THE DLIB PYTHON INTERFACE
-#   Dlib comes with a compiled python interface for python 2.7 on MS Windows. If
-#   you are using another python version or operating system then you need to
-#   compile the dlib python interface before you can use this file.  To do this,
-#   run compile_dlib_python_module.bat.  This should work on any operating
-#   system so long as you have CMake and boost-python installed.
-#   On Ubuntu, this can be done easily by running the command:
-#       sudo apt-get install libboost-python-dev cmake
+# COMPILING/INSTALLING THE DLIB PYTHON INTERFACE
+#   You can install dlib using the command:
+#       pip install dlib
 #
-#   Also note that this example requires scikit-image which can be installed
+#   Alternatively, if you want to compile dlib yourself then go into the dlib
+#   root folder and run:
+#       python setup.py install
+#
+#   Compiling dlib should work on any operating system so long as you have
+#   CMake installed.  On Ubuntu, this can be done easily by running the
+#   command:
+#       sudo apt-get install cmake
+#
+#   Also note that this example requires Numpy which can be installed
 #   via the command:
-#       pip install -U scikit-image
-#   Or downloaded from http://scikit-image.org/download.html. 
+#       pip install numpy
 
 import sys
 
 import dlib
-from skimage import io
-
 
 detector = dlib.get_frontal_face_detector()
 win = dlib.image_window()
 
 for f in sys.argv[1:]:
     print("Processing file: {}".format(f))
-    img = io.imread(f)
+    img = dlib.load_rgb_image(f)
     # The 1 in the second argument indicates that we should upsample the image
     # 1 time.  This will make everything bigger and allow us to detect more
     # faces.
@@ -63,11 +64,13 @@ for f in sys.argv[1:]:
 
 # Finally, if you really want to you can ask the detector to tell you the score
 # for each detection.  The score is bigger for more confident detections.
+# The third argument to run is an optional adjustment to the detection threshold,
+# where a negative value will return more detections and a positive value fewer.
 # Also, the idx tells you which of the face sub-detectors matched.  This can be
 # used to broadly identify faces in different orientations.
 if (len(sys.argv[1:]) > 0):
-    img = io.imread(sys.argv[1])
-    dets, scores, idx = detector.run(img, 1)
+    img = dlib.load_rgb_image(sys.argv[1])
+    dets, scores, idx = detector.run(img, 1, -1)
     for i, d in enumerate(dets):
         print("Detection {}, score: {}, face_type:{}".format(
             d, scores[i], idx[i]))

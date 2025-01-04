@@ -91,19 +91,21 @@
                <name>Home</name>
                <link>http://dlib.net</link>
             </item>
-            <item>
-               <name>Dlib Blog</name>
-               <link>http://blog.dlib.net</link>
-            </item>
-            <item>
-               <name>Forums</name>
-               <link>https://sourceforge.net/p/dclib/discussion</link>
-            </item>
-            <item>
-               <name>Who uses dlib?</name>
-               <link>http://sourceforge.net/p/dclib/wiki/Known_users/</link>
-            </item>
          </web>
+         <item>
+            <name>Dlib Blog</name>
+            <link>http://blog.dlib.net</link>
+         </item>
+         <!--
+         <item>
+            <name>Forums</name>
+            <link>https://sourceforge.net/p/dclib/discussion</link>
+         </item>
+         -->
+         <item>
+            <name>Who uses dlib?</name>
+            <link>http://sourceforge.net/p/dclib/wiki/Known_users/</link>
+         </item>
 
          <item>
             <name>Introduction</name>
@@ -142,15 +144,39 @@
             <name>Examples: Python</name>
             <sub>
                <item>
+                  <name>Global Optimization</name>
+                  <link>global_optimization.py.html</link>
+               </item>
+               <item>
+                  <name>Face Clustering</name>
+                  <link>face_clustering.py.html</link>
+               </item>
+               <item>
+                  <name>Face Jittering/Augmentation</name>
+                  <link>face_jitter.py.html</link>
+               </item>
+               <item>
+                  <name>Face Alignment</name>
+                  <link>face_alignment.py.html</link>
+               </item>
+               <item>
                   <name>Video Object Tracking</name>
                   <link>correlation_tracker.py.html</link>
+               </item>
+               <item>
+                  <name>Binary Classification</name>
+                  <link>svm_binary_classifier.py.html</link>
                </item>
                <item>
                   <name>Face Landmark Detection</name>
                   <link>face_landmark_detection.py.html</link>
                </item>
                <item>
-                  <name>find candidate object locations</name>
+                  <name>Face Recognition</name>
+                  <link>face_recognition.py.html</link>
+               </item>
+               <item>
+                  <name>Find Candidate Object Locations</name>
                   <link>find_candidate_object_locations.py.html</link>
                </item>
                <item>
@@ -160,6 +186,10 @@
                <item>
                   <name>Face Detector</name>
                   <link>face_detector.py.html</link>
+               </item>
+               <item>
+                  <name>CNN Face Detector</name>
+                  <link>cnn_face_detector.py.html</link>
                </item>
                <item>
                   <name>Train Object Detector</name>
@@ -186,6 +216,100 @@
          <item nolink="true">
             <name>Examples: C++</name>
             <sub>
+               <item>
+                  <name>Deep Learning Introduction Part 1</name>
+                  <link>dnn_introduction_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Introduction Part 2</name>
+                  <link>dnn_introduction2_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Introduction Part 3</name>
+                  <link>dnn_introduction3_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Imagenet Classifier</name>
+                  <link>dnn_imagenet_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning DCGAN</name>
+                  <link>dnn_dcgan_train_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Imagenet Trainer </name>
+                  <link>dnn_imagenet_train_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Inception</name>
+                  <link>dnn_inception_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Metric Learning Introduction</name>
+                  <link>dnn_metric_learning_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Metric Learning on Images</name>
+                  <link>dnn_metric_learning_on_images_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Face Recognition</name>
+                  <link>dnn_face_recognition_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Semantic Segmentation Trainer</name>
+                  <link>dnn_semantic_segmentation_train_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Semantic Segmentation</name>
+                  <link>dnn_semantic_segmentation_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Instance Segmentation</name>
+                  <link>dnn_instance_segmentation_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Instance Segmentation Trainer</name>
+                  <link>dnn_instance_segmentation_train_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Vehicle Detection</name>
+                  <link>dnn_mmod_find_cars_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Multi-Class Vehicle Detection</name>
+                  <link>dnn_mmod_find_cars2_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Vehicle Detection Trainer</name>
+                  <link>dnn_mmod_train_find_cars_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Face Detection</name>
+                  <link>dnn_mmod_face_detection_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Dog Hipsterizer</name>
+                  <link>dnn_mmod_dog_hipsterizer.cpp.html</link>
+               </item>
+               <item>
+                  <name>Deep Learning Max-Margin Object Detection</name>
+                  <link>dnn_mmod_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Self-supervised deep feature learning</name>
+                  <link>dnn_self_supervised_learning_ex.cpp.html</link>
+               </item>
+               <item>
+                  <name>Training a YOLO object detector</name>
+                  <link>dnn_yolo_train_ex.cpp.html</link>
+               </item>
+
+               <item>
+                  <name>Random Cropper</name>
+                  <link>random_cropper_ex.cpp.html</link>
+               </item>
+
                <item>
                   <name>Linear Model Predictive Control</name>
                   <link>mpc_ex.cpp.html</link>
@@ -532,7 +656,7 @@
  
       <section>
          <name>Current Release</name>
-         <item nolink="true">Version: <current_release/></item> 
+         <chm><item nolink="true">Version: <current_release/></item></chm>
          <item>
             <name>Release Notes</name>
             <link>release_notes.html</link>
@@ -546,26 +670,17 @@
 
       <web>
          <download_button>
-            <name>Download dlib</name>
+            <name><div id="dlname">Download dlib</div>
+                  <div id="dlib_version">ver.<current_release/></div>
+            </name>
             <link>http://dlib.net/files/dlib-<current_release/>.tar.bz2</link>
          </download_button>
       </web>
     </top>
 
    <bottom>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
       Last Modified:<br/>
       <last_modified_date/>
-      <br/>
-      <br/>
    </bottom>
    
    </menu>

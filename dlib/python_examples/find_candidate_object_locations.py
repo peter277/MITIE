@@ -13,18 +13,28 @@
 # a few thousand rectangles it is much faster than scanning all possible
 # rectangles inside an image.
 #
-#   Also note that this example requires scikit-image which can be installed
+#
+# COMPILING/INSTALLING THE DLIB PYTHON INTERFACE
+#   You can install dlib using the command:
+#       pip install dlib
+#
+#   Alternatively, if you want to compile dlib yourself then go into the dlib
+#   root folder and run:
+#       python setup.py install
+#
+#   Compiling dlib should work on any operating system so long as you have
+#   CMake installed.  On Ubuntu, this can be done easily by running the
+#   command:
+#       sudo apt-get install cmake
+#
+#   Also note that this example requires Numpy which can be installed
 #   via the command:
-#       pip install -U scikit-image
-#   Or downloaded from http://scikit-image.org/download.html. 
-
-
+#       pip install numpy 
 
 import dlib
-from skimage import io
 
 image_file = '../examples/faces/2009_004587.jpg'
-img = io.imread(image_file)
+img = dlib.load_rgb_image(image_file)
 
 # Locations of candidate objects will be saved into rects
 rects = []

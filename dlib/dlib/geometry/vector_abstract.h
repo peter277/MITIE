@@ -446,6 +446,52 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
+    bool is_convex_quadrilateral (
+        const std::array<dpoint,4>& pts
+    );
+    /*!
+        ensures
+            - If you walk the points in pts in order pts[0], pts[1], pts[2], pts[3], pts[0]
+              does it draw a convex quadrilateral?  This routine returns true if yes and
+              false if not.
+    !*/
+
+// ----------------------------------------------------------------------------------------
+
+    template <typename T>
+    std::vector<T> find_convex_hull(
+        std::vector<T>& points
+    );
+    /*!
+        requires
+            - T == dlib::point or dlib::dpoint
+        ensures
+            - If points.size() < 3: it returns an empty vector.
+            - Else: Finds the convex hull of points using the Graham scan algorithm.  That is,
+              the smallest convex shape that contains all points.  Moreover, in case all points
+              are collinear, that is, along the same line, it will also return an empty vector.
+    !*/
+
+// ----------------------------------------------------------------------------------------
+
+    template <
+        typename array_of_dpoints
+        >
+    double polygon_area (
+        const array_of_dpoints& pts
+    );
+    /*!
+        requires
+            - array_of_dpoints is something with an interface compatible with
+              std::vector<dpoint> or std::array<dpoint,N>.
+        ensures
+            - If you walk the points pts in order to make a closed polygon, what is its
+              area?  This function returns that area.  It uses the shoelace formula to
+              compute the result and so works for general non-self-intersecting polygons.
+    !*/
+
+// ----------------------------------------------------------------------------------------
+
 }
 
 namespace std

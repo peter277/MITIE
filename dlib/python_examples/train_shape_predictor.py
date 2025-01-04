@@ -16,27 +16,28 @@
 #   prediction tasks.  But here we demonstrate it only on a simple face
 #   landmarking task.
 #
-# COMPILING THE DLIB PYTHON INTERFACE
-#   Dlib comes with a compiled python interface for python 2.7 on MS Windows. If
-#   you are using another python version or operating system then you need to
-#   compile the dlib python interface before you can use this file.  To do this,
-#   run compile_dlib_python_module.bat.  This should work on any operating
-#   system so long as you have CMake and boost-python installed.
-#   On Ubuntu, this can be done easily by running the command:
-#       sudo apt-get install libboost-python-dev cmake
+# COMPILING/INSTALLING THE DLIB PYTHON INTERFACE
+#   You can install dlib using the command:
+#       pip install dlib
 #
-#   Also note that this example requires scikit-image which can be installed
+#   Alternatively, if you want to compile dlib yourself then go into the dlib
+#   root folder and run:
+#       python setup.py install
+#
+#   Compiling dlib should work on any operating system so long as you have
+#   CMake installed.  On Ubuntu, this can be done easily by running the
+#   command:
+#       sudo apt-get install cmake
+#
+#   Also note that this example requires Numpy which can be installed
 #   via the command:
-#       pip install -U scikit-image
-#   Or downloaded from http://scikit-image.org/download.html. 
+#       pip install numpy
 
 import os
 import sys
 import glob
 
 import dlib
-from skimage import io
-
 
 # In this example we are going to train a face detector based on the small
 # faces dataset in the examples/faces directory.  This means you need to supply
@@ -102,7 +103,7 @@ print("Showing detections and predictions on the images in the faces folder...")
 win = dlib.image_window()
 for f in glob.glob(os.path.join(faces_folder, "*.jpg")):
     print("Processing file: {}".format(f))
-    img = io.imread(f)
+    img = dlib.load_rgb_image(f)
 
     win.clear_overlay()
     win.set_image(img)

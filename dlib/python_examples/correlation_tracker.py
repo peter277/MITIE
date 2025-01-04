@@ -14,25 +14,28 @@
 # and someone is waving the camera around.  The task is to track the position of
 # the juice box as the camera moves around.
 #
-# COMPILING THE DLIB PYTHON INTERFACE
-#   Dlib comes with a compiled python interface for python 2.7 on MS Windows. If
-#   you are using another python version or operating system then you need to
-#   compile the dlib python interface before you can use this file.  To do this,
-#   run compile_dlib_python_module.bat.  This should work on any operating
-#   system so long as you have CMake and boost-python installed.
-#   On Ubuntu, this can be done easily by running the command:
-#       sudo apt-get install libboost-python-dev cmake
 #
-#   Also note that this example requires scikit-image which can be installed
+# COMPILING/INSTALLING THE DLIB PYTHON INTERFACE
+#   You can install dlib using the command:
+#       pip install dlib
+#
+#   Alternatively, if you want to compile dlib yourself then go into the dlib
+#   root folder and run:
+#       python setup.py install
+#
+#   Compiling dlib should work on any operating system so long as you have
+#   CMake installed.  On Ubuntu, this can be done easily by running the
+#   command:
+#       sudo apt-get install cmake
+#
+#   Also note that this example requires Numpy which can be installed
 #   via the command:
-#       pip install -U scikit-image
-#   Or downloaded from http://scikit-image.org/download.html. 
+#       pip install numpy
 
 import os
 import glob
 
 import dlib
-from skimage import io
 
 # Path to the video frames
 video_folder = os.path.join("..", "examples", "video_frames")
@@ -45,7 +48,7 @@ win = dlib.image_window()
 # We will track the frames as we load them off of disk
 for k, f in enumerate(sorted(glob.glob(os.path.join(video_folder, "*.jpg")))):
     print("Processing Frame {}".format(k))
-    img = io.imread(f)
+    img = dlib.load_rgb_image(f)
 
     # We need to initialize the tracker on the first frame
     if k == 0:

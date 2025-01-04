@@ -11,6 +11,1152 @@
 <!-- **************************************************************************************  -->
 
 <current>
+New Features and Improvements:
+   - Added auto_train_multiclass_svm_linear_classifier(), a tool that trains a multiclass
+     SVM linear classifier without requiring the user to supply any hyperparameters.
+   - Add draw_solid_polygon() (PR #2775)
+   - Add insert_image_chip() (PR #2781)
+
+   - Unify all conversions to UTF-32 #2737
+      - Adds convert_to_utf32()
+
+   - Backports of new C++ tooling not yet available in C++14:
+      - Added bind_front() and bind_back() (PR #2705)
+      - Added dlib/type_traits.h
+         - Contains type trait back ports and also many older dlib type traits that can now be
+           aliased to those in C++14 or earlier.
+      - dlib::optional (PR #2815)
+
+   - Container classes
+      - Support noexcept dlib::type_safe_union::swap() (PR #2604)
+      - dlib::optional (PR #2815)
+      - New type erasure tooling in dlib/any/storage.h (PR #2666)
+
+   - Update libraries in dlib/external
+      - Update libjpeg to version 9e (PR #2619)
+      - Update Pybind11 to v2.10.0 (PR #2660)
+
+   - YOLO improvements: Smoothed L1 loss, Focal Loss, Weighted Loss (PR #2628)
+
+   - Speeding things up:
+      - Optimize pointer to matrix assignment (PR #2822)
+      - circular_buffer : 10X speedup (PR #2779)
+      - type_safe_union : visit() and apply_to_contents() performance improvements (PR #2615)
+      - Speed up DNN execution.  PRs: 2656, 2839, 2842
+   - Add support for loading custom label fonts in imglab via --font (PR #2733)
+   - Add HSV pixel support (PR #2758)
+   - Add simple polygon class (PR #2750)
+     
+
+  # TODO: davis update web docs for this
+   - FFT tooling
+      - stft(), istft(), stftr() and istftr() (PR #2627)
+      - [FFT] split FFT API into different layers #2793
+         - Adds the dlib/fft folder and some more overloads of fft functions.  Update doc links for sure.
+   - if constexpr() for C++14 (PR #2654)
+      - Adds dlib/constexpr_if.h, update doc links with this
+   - FFMPEG wrappers: dlib::ffmpeg::decoder and dlib::ffmpeg::demuxer (PR #2707)
+
+Non-Backwards Compatible Changes:
+   - Dlib now requires C++14 and at least CMake version 3.8.0.
+
+Bug fixes:
+   - Various adjustments to avoid errors on unusual platforms of system configurations.
+   - Fix saving grayscale WebP images (PR #2591)
+   - Fix dnn dot visitor when a tag layer is followed by a skip layer (PR #2662)
+   - Fix memory leak in WebP saving (PR #2600)
+   - Bug fix for fftr on matrix expression (PR #2626)
+   - Problem: CUDA error having `code: 716, reason: misaligned address` (PR #2796)
+   - Fix pixel saturation in interpolate_quadratic (PR #2806)
+   - Fix convolution backward filter cache issue when using cudnn 7 and above (PR #2828)
+</current>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.24" date="May 8, 2022">
+New Features and Improvements:
+   - Added Beta distribution to dlib::rand.
+   - Added directory_exists.
+   - Added bgr_alpha_pixel type.
+   - Added support for loading and saving WebP images.
+   - Deep learning tooling:
+      - Added ReOrg layer.
+      - Added SiLU layer.
+      - Added visitor to draw network architectures using the DOT language.
+      - Made Barlow Twins loss much faster for high dimensionality inputs.
+      - Added Focal loss gamma to loss_multibinary_log_.
+      - Added SmeLU activation layer.
+
+Non-Backwards Compatible Changes:
+   - Do not round coordinates in rectangle_transform (PR #2498).
+
+Bug fixes:
+   - Fix missing ssize_t definition on Windows (PR #2492)
+   - Fix Barlow Twins loss gradient (PR #2518)
+   - Fix bug with some versions of cuDNN (PR #2527)
+   - Fix python import errors on some systems.
+   - Various cmake adjustments to avoid build failures on some systems.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.23" date="Jan 24, 2022">
+New Features and Improvements:
+   - Added serialization support for std::variant and std::optional.
+   - Added upgrades to dlib::type_safe_union: type_safe_union_size, type_safe_union_alternative_t,
+     made into variadic template, more generic visit() method.
+   - Added dlib/invoke.hh which contains C++11 backports of std::invoke and related tooling.
+   - Added letterbox_image()
+   - Exposed momentum_filter to Python.
+   - Deep learning tooling:
+      - Added Clipped ReLU and ELU activations
+      - Made input_layer() work with networks that contain repeat layers.
+      - Added loss_yolo_ for training YOLO style object detectors.
+      - Added support for fused convolutions, see dlib::fuse_layers().
+      - Added dnn self supervised learning example: dnn_self_supervised_learning_ex.cpp
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fix input/output mappings with repeat layers (PR #2337)
+   - Fix disable_duplicative_biases when the input is a skip layer (PR #2367)
+   - Fix cannot compile iso only code (PR #2384)
+   - Fix running gradient crashing sometimes (PR #2401)
+   - Fix trainer with unsupervised loss (PR #2436)
+   - Fix dnn_trainer trying to decrease the learning rate (PR #2442)
+   - Fix Layer Normalize (PR #2489)
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.22" date="Mar 28, 2021">
+New Features and Improvements:
+   - Deep learning tooling:
+      - Added loss_multibinary_log_
+      - Added scale_prev layer
+      - Various ease of use improvements to the deep learning tooling, such as improved layer
+        visitors and increased DNN training stability.
+      - Added CUDA implementation for loss_multiclass_log_per_pixel_weighted.
+      - Add GELU activation layer
+      - Add Layer Normalization
+      - Add CIFAR-10 dataset loader: load_cifar_10_dataset()
+   - Add probability_values_are_increasing() and probability_values_are_increasing_robust().
+   - Expanded list of serializable types and added DLIB_DEFINE_DEFAULT_SERIALIZATION, a macro that
+     lets you make a class serializable with a single simple declaration.
+   - Added exponential and Weibull distributions to dlib::rand.
+   - For dlib::matrix:
+         - Added soft_max() and pointwise_pow()
+         - The FFT methods now support arbitrary sized FFTs and are more performant.
+   - Added user definable stopping condition support to find_min_global() and find_max_global().
+
+Non-Backwards Compatible Changes:
+   - Rename POSIX macro to DLIB_POSIX to avoid name clashes with some libraries.
+   - Dropped support for gcc 4.8.
+
+Bug fixes:
+   - Fixed bug in loss_mmod that degraded the quality of bounding box regression.  Now
+     bounding box regression works a lot better.
+   - Fixes for code not compiling in various environments and support newer CUDA tooling.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.21" date="Aug 08, 2020">
+New Features and Improvements:
+   - Added support for cuDNN 8.0.
+   - Added support for CUDA in Python 3.8 on Windows.
+   - Allow forwarding initial function evaluations into find_max_global().
+   - Can now load PNG images from a memory buffer.
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Improved error messages for python users trying to install dlib
+     with CUDA enabled or who are using windows.
+   - Fix random forest regression not doing quite the right thing.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.20" date="Jun 06, 2020">
+New Features and Improvements:
+   - Added CUDA implementation for loss_mean_squared_per_channel_and_pixel.
+   - Added DCGAN example in examples/dnn_dcgan_train_ex.cpp
+   - Added transfer learning example in examples/dnn_introduction3_ex.cpp
+   - Added leaky_relu activation layer
+   - Added mish activation layer 
+   - Added loss_multiclass_log_weighted
+   - Added loss_binary_log_per_pixel
+   - Minor API simplifications in deep learning tooling.
+   - imglab can automatically select the number of image clusters when --cluster 0 is given.
+   - Added a relative epsilon termination option to svm_c_linear_trainer
+   - Support new version of OpenCV that doesn't have IplImage anymore.
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Corrected interpolate_bilinear for lab_pixel.
+   - Fix build errors in CUDA 10.2
+   - Make equal_error_rate() handle degenerate case where all scores are equal.
+   - Fix DLIB_ISO_CPP_ONLY not working
+   - Fix build errors in C++20 build mode.
+   - Fixed function_evaluation_request::set() invalidating function_evaluation_request::x()
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.19" date="Dec 14, 2019">
+New Features and Improvements:
+   - Made find_min_global() and find_max_global() much faster when using them
+     to optimize inexpensive functions.  These tools now measure the runtime of
+     the objective function and automatically tune themselves to balance solver
+     overhead vs objective function execution time.
+   - Improved handling of label and ignore boxes in loss_mmod layer.
+     See here for more details: https://github.com/davisking/dlib/issues/1894
+   - Better auto-detection of build configurations on some platforms.
+   - Shiny new deep instance segmentation examples:
+     dnn_instance_segmentation_ex.cpp and dnn_instance_segmentation_train_ex.cpp.  
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fix build error in some versions of visual studio in some setups.
+   - Fix find_max() going into an infinite loop in some cases when a
+     non-differentiable function is given.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.18" date="Sep 22, 2019">
+New Features and Improvements:
+   - Make dlib.full_object_detection take list of dlib.point or dlib.points.
+   - CMake scripts will automatically include the Intel MKL's iomp dll in the
+     output folder to reduce confusion for windows users who haven't added the
+     Intel MKL to their PATH.  This avoids a dll not found error that would
+     otherwise result in that situation.
+   - load_jpeg() now supports loading from a memory buffer.
+   - Added input_grayscale_image_pyramid DNN input layer.
+   - Added loss_mean_squared_per_channel DNN input layer.
+   - Added methods for getting keyboard and mouse clicks to image_window's python API.
+   - Made pkg-config report all needed include and link settings to use dlib.
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Setting a point's y coordinate changed x instead, when done from Python.
+     This has been fixed.
+   - Fixed global_function_search's initialization being wrong if explicitly
+     given an empty list of initial function evaluations.
+   - Fixed compile time errors on some uncommon system configurations.
+   - Work around bugs in CUDA runtime on some systems.
+   - Various improvements to CMake built scripts to handle unusual system configurations.
+   - Fixed bug in multi-GPU training of semantic segmentation models.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.17" date="Mar 10, 2019">
+New Features and Improvements:
+   - Added weighted labels to loss_binary_log layer.
+   - Added padding option to Python compute_face_descriptor() methods.
+   - Added pointwise_divide function.
+   - Added U-net style skip connections to the semantic-segmentation example.
+   - Exposed dlib::chinese_whispers() directly in Python API.
+   - Added python api that generates desciptor(s) from the aligned image(s).
+   - Added support for CUDA 10.1.
+   - Dlib's python install process always automatically enables all supported features.  
+     So --yes &lt;option&gt; was removed as it does nothing.
+   - Added --box-images to imglab.
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fixed build errors on some systems or buggy compilers.
+   - Workaround for bug in cudaStreamSynchronize() causing hanging in some rare cases.
+   - Fixed broken CUDA memcpy overload.
+   - Fixed CMake not finding cusolver in CUDA 10.1. 
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.16" date="Sep 29, 2018">
+New Features and Improvements:
+   - Allow 64bit seeds for murmur hash.
+   - Some code paths are a little faster.
+   - Added an option to do bounding box regression to the loss_mmod layer.
+   - Added resize_image(img,scale) to Python API.
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fixed build errors in some environments.
+   - Make older versions of CMake work with CUDA 10.
+   - Fixed is_image_type template always reporting false. This also caused
+     have_same_dimensions() to be uncallable for images, so that's fixed now too.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.15" date="Jul 13, 2018">
+New Features and Improvements:
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fixed sub_image() in the Python API not working correctly for non-8bit images.
+   - Last release broke have_same_dimensions(). The version specific to images
+     was being used for tensors, which is incorrect and caused some of the DNN
+     tooling to malfunction.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.14" date="Jul 07, 2018">
+New Features and Improvements:
+   - Added a --split-train-test option to imglab.
+   - Added a max runtime option to the oca solver and structural object
+     detection trainer.
+   - Added an option to do translational jittering of the bounding boxes in the
+     shape_predictor_trainer.  Using this option allows you to train
+     shape_predictors that are somewhat more robust against variation in
+     detection box placement. 
+   - Added an optional thread_pool argument to find_max_global() and
+     find_min_global() to allow for parallel execution of objective function calls.
+   - Added auto_train_rbf_classifier(), a tool that trains a RBF-SVM without requiring the user
+     to supply any hyperparameters.
+   - Added polygon_area()
+   - The image view objects now implement the generic image interface.
+   - Updates to the Python API:
+       - Added Python bindings for: extract_image_chip(),
+         extract_image_chips(), center(), get_histogram(), sub_image(),
+         polygon_area(), auto_train_rbf_classifier(), reduced(),
+         translate_rect(), spatially_filter_image(),
+         spatially_filter_image_separable(), num_separable_filters(),
+         threshold_filter_singular_values(), max_point(),
+         max_point_interpolated(), zero_border_pixels().  Also added an option
+         for training nuclear norm regularized HOG detectors.
+       - Added a bunch of new overloads and operators for existing Python types.
+       - Made decision functions more viewable from python.  You can now inspect
+         the contents of the functions rather than them being completely opaque.
+       - Made it so you can call the std::vector&lt;detectors&gt; version of
+         the object_detector constructor from python. So now you can pack
+         multiple detectors into one object via the python API.
+       - Allow batched face recognition for greater performance.
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fixed the point and dpoint operator + doing subtraction in the Python API.
+   - Fixed label_connected_blobs_watershed() not giving contiguous labels as outputs. 
+   - Fixed AVX detection not working correctly on some systems.
+   - Fixed dlib.threshold_image() ignoring the optional thresh argument in the Python API.
+   - Fixed hough_transform::find_pixels_voting_for_lines(). It would sometimes
+     include a pixel multiple times in the output lists.
+   - Made the routines that rotate image datasets use the rectangle_transform
+     instead of the bad old way that only really worked for square boxes.  This
+     improves placement of such rotated rectangular boxes.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.13" date="May 26, 2018">
+New Features and Improvements:
+   - Added a lot of new Python bindings.  You can now use these things from Python:
+      - gaussian_blur(), label_connected_blobs(), randomly_color_image(), jet(),
+        skeleton(), find_line_endpoints(), get_rect(), shrink_rect(), grow_rect(),
+        image_gradients, label_connected_blobs_watershed(), convert_image(),
+        convert_image_scaled(), dpoint, centered_rect(), centered_rects(), length(),
+        as_grayscale(), pyramid_down, find_bright_keypoints(), find_bright_lines(),
+        find_dark_lines(), find_dark_keypoints(), suppress_non_maximum_edges(),
+        find_peaks(), hysteresis_threshold(), sobel_edge_detector(), equalize_histogram(),
+        resize_image(), hough_transform, remove_incoherent_edge_pixels(),
+        normalize_image_gradients(), line, signed_distance_to_line(), distance_to_line(),
+        reverse(), intersect(), count_points_on_side_of_line(),
+        count_points_between_lines(), dot(), normalize(), point_transform_projective,
+        find_projective_transform(), inv(), transform_image(), angle_between_lines(),
+        extract_image_4points(), load_grayscale_image(), min_barrier_distance(). 
+      - Added a .add_overlay_circle() to dlib.image_window.  Also made .add_overlay()
+        take lines.
+      - Added the *_corner() routines to rectangle and drectangle and made these 
+        objects constructable from instances of each other.
+   - Made the Python extension module automatically enable AVX instructions if the host
+     machine supports them.  So you never need to say --yes USE_AVX_INSTRUCTIONS anymore
+     when installing dlib.
+
+   - New C++ routines:
+      - Added an image_window::add_overlay() overload for line object.
+      - Added angle_between_lines()
+      - Added extract_image_4points()
+      - Added is_convex_quadrilateral(), find_convex_quadrilateral(), and no_convex_quadrilateral.
+      - Added python_list_to_array()
+      - Added min_barrier_distance() 
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fixed numpy_image and pybind11 crashing python sometimes when certain types of
+     conversions are attempted.
+   - Fixed some python functions not taking as wide a range of image types as they did in
+     previous dlib versions.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.12" date="May 19, 2018">
+New Features and Improvements:
+   - Added Python interface to threshold_image() and partition_pixels().
+
+Non-Backwards Compatible Changes:
+   - In the Python API, renamed dlib.save_rgb_image() to dlib.save_image().
+
+Bug fixes:
+   - Dlib 19.11 had a bug that caused the Python interface to reject grayscale images.
+     This has been fixed.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.11" date="May 17, 2018">
+New Features and Improvements:
+   - Deep Learning
+      - Added resize_to layer.
+      - Made loss_multiclass_log_per_pixel use CUDA. This greatly accelerates 
+        training with this loss layer.
+   - Image Processing
+      - Added normalize_image_gradients() and remove_incoherent_edge_pixels().
+      - Added neighbors_24 (for use with label_connected_blobs())
+      - Added partition_pixels() and made threshold_image() use it to find the
+        default threshold if none is given. Also depreciated
+        auto_threshold_image() since using partition_pixels() to pick the
+        threshold is superior.
+      - Added overload of hysteresis_threshold() that uses partition_pixels()
+        to select thresholds.
+      - Added encode_8_pixel_neighbors() and find_line_endpoints().
+      - Added image_gradients, a tool for computing multi-scale first and
+        second order image gradients. 
+      - Added find_bright_lines(), find_dark_lines(), find_bright_keypoints(),
+        and find_dark_keypoints(). 
+      - Added label_connected_blobs_watershed().
+      - Added find_peaks().
+      - Added find_pixels_voting_for_lines(), find_strong_hough_points(),
+        and perform_generic_hough_transform() to the hough_transform.
+   - Improved the stopping condition of the solve_qp_box_constrained() and
+     solve_qp_box_constrained_blockdiag() quadratic program solvers.
+   - Made find_min_single_variable() more numerically stable.
+   - Make visual studio build with all cores when building dlib.
+   - Added steal_memory() to the matrix.
+   - Improved the workflow for adding part annotations in imglab.  You can now
+     use shift+click to rapidly add parts to an object.  Each part will
+     automatically receive an integer label.
+   - Added .begin() and .end() to array2d.
+   - Added the line class and some related utility functions.
+   - Added centered_rects().
+   - Added numpy_image, which is a simple type safe interface to numpy arrays.
+     It is also a fully functional dlib image class, making interfacing dlib's
+     image processing to Python much cleaner.  
+
+Non-Backwards Compatible Changes:
+   - All CUDA code in dlib was moved to dlib/cuda.
+
+Bug fixes:
+   - Replaced all the old Python C APIs interfacing to numpy with the new
+     numpy_image.  This fixed some reference counting errors as a result.
+   - Fixed load_bmp() not loading certain types of BMP images. 
+   - Fixed compile time bugs when trying to use CBLAS in some unusual environments.
+   - Fixed bug in global_function_search's constructor that takes initial function
+     evaluations. It wasn't assigning these values into the entire state of the
+     solver.
+   - Fixed compile time error in the matlab bindings.  Also, fixed cell arrays
+     of complex types not binding correctly.
+   - Renamed BOOST_JOIN to DLIB_BOOST_JOIN to prevent name clashes when working
+     with boost.
+   - Fixed bug in hysteresis_threshold() that could cause incorrect output.
+   - The last release of dlib added more ODR violation checks.  However, these
+     could erroneously trigger when using Visual Studio and CUDA in certain
+     workflows.  This has been fixed.
+   - Fixed matrix objects not working correctly when sized greater than 4GB in
+     Visual Studio.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.10" date="Mar 19, 2018">
+New Features and Improvements:
+   - Deep Learning:
+      - Added scale_ layer, allowing implementation of squeeze-and-excitation networks.
+      - Added loss_multimulticlass_log: used for learning a collection of multi-class classifiers.
+   - Added a random forest regression tool. See random_forest_regression_trainer.
+   - Added make_bounding_box_regression_training_data()
+   - Added isotonic_regression
+   - Added momentum_filter, rect_filter, find_optimal_momentum_filter(), and
+     find_optimal_rect_filter().
+   - Added binomial_random_vars_are_different() and event_correlation().
+   - Added xcorr_fft(), a routine for efficiently performing large cross-correlations using the FFT.
+   - Added the ramdump type decorator for invoking faster serialization routines.
+   - Added check_serialized_version()
+   - Added max_scoring_element() and min_scoring_element()
+   - Made orthogonalize() faster.
+   - Updates to the Python API:
+      - Added interface to the global_function_search object.  This is a more general
+        interface to the solver used by find_max_global().
+      - Added support for variadic Python functions in find_max_global().
+      - Added rect_filter and find_optimal_rect_filter().
+      - Added make_bounding_box_regression_training_data()
+      - Added the image_dataset_metadata routines for parsing XML datasets.
+      - Added rvm_trainer
+      - Added probability_that_sequence_is_increasing() 
+      - Added dlib.__time_compiled__ field
+      - Added num_threads to shape_predictor_training_options.
+      - Added CUDA controlling routines such as set_device() and 
+        set_dnn_prefer_smallest_algorithms().
+
+Non-Backwards Compatible Changes:
+   - Changed CMake so that there is only the dlib target and it isn't forced to
+     be static.  Instead, the build type will toggle based on the state of CMake's
+     BUILD_SHARED_LIBS variable.  So there is no longer a dlib_shared target.
+   - Changed the integer types used to represent sizes from 32bits to 64bits in numerous
+     places, such as in the tensor object.  This should be a backwards compatible change
+     for nearly all client code.
+
+Bug fixes:
+   - Fixed memory leak in java swig array binding tool.
+   - Fixed windows include order problem in all/source.cpp file.
+   - Fixed cont_ layers not printing the correct num_filters parameter when they were 
+     printed to std::cout or to XML.
+   - Fixed some code not handling OBJECT_PART_NOT_PRESENT values correctly.
+   - Fixed fft_inplace() not compiling for compile time sized matrices.
+   - The shape_predictor_trainer could have very bad runtime for some really
+     bad parameter settings.  This has been fixed and also warning messages about
+     really bad training data or parameters have been added.
+   - Fixed the decayed running stats objects so they use unbiased estimators.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.9" date="Jan 22, 2018">
+New Features and Improvements:
+   - Switched the Python API from Boost.Python to pybind11.  This means Python
+     users don't need to install Boost anymore, making building dlib's Python API
+     much easier.
+   - Made the sparse version of svd_fast() use multiple CPU cores.
+   - Changed the behavior of imglab's --flip option.  It will now attempt to
+     adjust any object part labels so that the flipped dataset has the same
+     average part layout as the source dataset. There is also a new --flip-basic 
+     option that behaves like the old --flip. However, most people flipping a
+     dataset with part annotations will want to use --flip.  For more details
+     see: http://blog.dlib.net/2018/01/correctly-mirroring-datasets.html
+
+Non-Backwards Compatible Changes:
+   - Removed std::auto_ptr from dlib's old (and depreciated) smart pointers. 
+
+Bug fixes:
+   - Fixed global_optimization.py not working in Python 3.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.8" date="Dec 19, 2017">
+New Features and Improvements:
+   - Added a global optimizer, find_max_global(), which is suitable for
+     optimizing expensive functions with many local optima.  For example, you
+     can use it for hyperparameter optimization.  See model_selection_ex.cpp
+     for an example.
+   - Updates to the deep learning tooling:
+      - Added semantic segmentation examples: dnn_semantic_segmentation_ex.cpp
+        and dnn_semantic_segmentation_train_ex.cpp
+      - New layers: loss_ranking, loss_epsilon_insensitive, softmax_all, and loss_dot.
+      - Made log loss layers more numerically stable.
+      - Upgraded the con layer so you can set the number of rows or columns to
+        0 in the layer specification. Doing this means "make the filter cover
+        the whole input image dimension".  This provides an easy way to make a
+        filter sized so it will have one output along that dimension,
+        effectively making it like a fully connected layer operating on a row
+        or column.
+      - Added support for non-scale-invariant MMOD.
+      - Added an optional parameter to dnn_trainer::get_net() that allows you
+        to call the function without forcing a state flush to disk.
+      - Sometimes the loss_mmod layer could experience excessively long runtime
+        during early training iterations.  This has been optimized and is now
+        much faster.
+      - Optimized the tensor's management of GPU memory.  It now uses less memory
+        in some cases.  It will also not perform a reallocation if resized to a
+        smaller size.  Instead, tensors now behave like std::vector in that
+        they just change their nominal size but keep the same memory, only
+        reallocating if they are resized to something larger than their
+        underlying memory block. This change makes some uses of dlib faster, in
+        particular, running networks on a large set of images of differing
+        sizes will now run faster since there won't be any GPU reallocations,
+        which are notoriously slow.
+      - Upgraded the input layer so you can give
+        input&lt;std::array&lt;matrix&lt;T&gt;,K&gt;&gt; types as input. Doing
+        this will create input tensors with K channels.
+   - Added disjoint_subsets_sized
+   - Added Python APIs: get_face_chips(), count_steps_without_decrease(),
+     count_steps_without_decrease_robust(), and jitter_image().
+   - Various improvements to CMake scripts: e.g. improved warning and error
+     messages, added USE_NEON_INSTRUCTIONS option.
+   - chol() will use a banded Cholesky algorithm for banded matrices, making it
+     much faster in these cases.
+   - Changed the timing code to use the C++11 high resolution clock and
+     atomics. This makes the timing code a lot more precise.
+
+Non-Backwards Compatible Changes:
+   - Changed the random_cropper's set_min_object_size() routine to take min box
+     dimensions in the same format as the mmod_options object (i.e. two lengths
+     measured in pixels). This should make defining random_cropping strategies
+     that are consistent with MMOD settings more straightforward since you can
+     simply take the mmod_options settings and give them to the random_cropper
+     and it will do the right thing.
+   - Changed the mean squared loss layers to return a loss that's the MSE, not
+     0.5*MSE. The only thing this effects is the logging messages that print
+     during training, which were confusing since the reported loss was half the
+     size you might naively expect.
+   - Changed the outputs of test_regression_function() and cross_validate_regression_trainer().
+     These functions now output 4D rather than 2D vectors.  The new output is:
+     mean squared error, correlation, mean absolute error, and standard
+     deviation of absolute error.  I also made test_regression_function() take
+     a non-const reference to the regression function so that DNN objects can
+     be tested.
+   - Fixed shape_predictor_trainer padding so it behaves as it used to. In
+     dlib 19.7 the padding code was changed and accidentally doubled the size
+     of the applied padding in some cases. It's not a huge deal either way, but
+     this change reverts back to the previous behavior.
+
+Bug fixes:
+   - Fixed toMat() not compiling in some cases.
+   - Significantly reduced the compile time of the DNN example programs in
+     visual studio.
+   - Fixed a few image processing functions that weren't using the generic
+     image interface.
+   - Fixed a bug in the random_cropper where it might crash due to division by
+     0 if small images were given as input.
+   - Fixed a bug in how the mmod_options automatically determines detection
+     window sizes. It would pick a bad size in some cases.
+   - Fixed load_image_dataset()'s skip_empty_images() option. It wasn't
+     skipping images that only have ignore boxes when you load into mmod_rect
+     objects.
+   - Fixed a bug where chinese_whispers(), when called from python, would
+     sometimes return a labels array that didn't include labels for all the
+     inputs.
+   - Fixed a bug in dlib's MS Windows GUI code that was introduced a little
+     while back when we switched everything to std::shared_ptr.  This change
+     fixes a bug where the program crashes or hangs sometimes during program
+     shutdown.
+   - Fixed error in TIME_THIS() introduced in dlib 19.7. It was printing
+     seconds when it said minutes in the output.
+   - Adding missing implementation of tabbed_display::selected_tab.
+   - Changed the windows signaler and mutex code to use the C++11 thread
+     library instead of the old win32 functions. I did this to work around how
+     windows unloads dlls. In particular, during dll unload windows will kill
+     all threads, THEN it will destruct global objects. So this can lead to
+     problems when a global object that owns threads tries to tell them to
+     shutdown, since the threads have already vanished.  The new code mitigates
+     some of these problems, in particular, there were some cases where
+     unloading dlib's python extension would deadlock.  This should now be
+     fixed.
+   - Fixed compile time errors when either of these macros were enabled:
+     DLIB_STACK_TRACE, DLIB_ISO_CPP_ONLY.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.7" date="Sep 17, 2017">
+New Features and Improvements:
+   - Deep Learning:
+      - The CNN+MMOD detector is now a multi-class detector.  In particular,
+        the mmod_rect object now has a string label field which you can use to
+        label objects, and the loss_mmod_ layer will learn to label objects with
+        those labels.  For an example, see: https://www.youtube.com/watch?v=OHbJ7HhbG74
+      - CNN+MMOD detectors are now 2.5x faster.  For instance, this example program
+        http://dlib.net/dnn_mmod_find_cars_ex.cpp.html now runs at 98fps instead
+        of 39fps.  
+   - Added a 5 point face landmarking model that is over 10x smaller than the
+     68 point model, runs faster, and works with both HOG and CNN generated
+     face detections.  It is now the recommended landmarking model to use for 
+     face alignment.  render_face_detections() and get_face_chip_details() have been 
+     updated to work with both 5 and 68 point models, so the new 5 point model is
+     a drop in replacement for the 68 point model.
+   - The imglab tool is slightly improved.  It will display box labels with
+     higher relative contrast.  You can also now press END or i to ignore boxes
+     in imglab. This is useful because it's a much less stressing hand motion
+     to hit END that i in most cases.
+   - Added overloads of sub_image() that take raw pointers so you can make
+     sub_images of anything. 
+   - Changed TIME_THIS() to use std::chrono::high_resolution_clock, so now it's
+     much higher precision.
+   - Exposed Chinese whispers clustering to Python, added face clustering example.
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fixed an error in input_rgb_image_pyramid::image_contained_point(). The
+     function might erroneously indicate that a point wasn't inside the original
+     image when really it was, causing spurious error messages.
+   - mmod_options would pick bad window sizes in some corner cases. This has been fixed.
+   - Fixed a bug in the extract layer that trigged when a tensor with a
+     different number of samples than the tensor used to initialize the network
+     was passed through the layer.
+   - The loss_per_missed_target parameter of the loss_mmod_ wasn't being used
+     exactly right when boxes were auto-ignored.  There weren't any practical
+     user facing problems due to this, but it has nevertheless been fixed. 
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.6" date="Aug 28, 2017">
+New Features and Improvements:
+
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fix build error in Visual Studio when CUDA is enabled. 
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.5" date="Aug 27, 2017">
+New Features and Improvements:
+   - Deep Learning
+      - Added a python wrapper for using the CNN face detector.
+      - Added support for cuDNN v6 and v7.
+      - Added a simple tool to convert dlib model files to caffe models.  
+        See the tools/convert_dlib_nets_to_caffe folder for details.
+      - New DNN layers
+         - loss_multiclass_log_per_pixel_
+         - loss_multiclass_log_per_pixel_weighted_
+         - loss_mean_squared_per_pixel_
+         - cont_       (transpose convolution, sometimes called "deconvolution")
+         - mult_prev_  (like add_prev_ but multiplies instead of adds)
+         - extract_    (sort of like caffe's slice layer)
+         - upsample_   (upsamples a tensor using bilinear interpolation)
+      - Object Detection
+         - Upgraded loss_mmod_ to support objects of varying aspect ratio. This
+           changes the API for the mmod_options struct slightly.
+         - Relaxed the default non-max suppression parameters used by the
+           mmod_options object so that users of the deep learning MMOD tool don't
+           get spurious errors about impossibly labeled objects during training.
+         - Added missing input validation to loss_mmod_.  Specifically, the loss
+           layer now checks if the user is giving truth boxes that can't be detected
+           because the non-max suppression settings would prevent them from being
+           output at the same time. If this happens then we print a warning message
+           and set one of the offending boxes to "ignore".  I also changed all
+           the input validation errors to warning messages with auto conversion
+           to ignore boxes rather than exceptions.
+         - Changed the random_cropper's interface so that instead of talking in
+           terms of min and max object height, it's now min and max object size.
+           This way, if you have objects that are short and wide (i.e. objects where
+           the relevant dimension is width rather than height) you will get sensible
+           behavior out of the random cropper.
+         - Added options to input_rgb_image_pyramid that let the user set
+           create_tiled_pyramid()'s padding parameters. Also changed the default
+           outer border padding from 0 to 11. This effects even previously trained
+           models. So any model that doesn't explicitly set the outer patting to
+           something else will have a padding of 11. This should be a more
+           reasonable value for most networks.
+         - Added process() and process_batch() to add_loss_layer. These routines
+           let you easily pass arguments to any optional parameters of a loss
+           layer's to_tensor() routine. For instance, it makes it more convenient to
+           set loss_mmod_'s adjust_threshold parameter.
+      - Added visit_layers_until_tag()
+      - Improved how dnn_trainer synchronizes its state to disk.  It now uses
+        two files and alternates between them.  This should be more robust in
+        the face of random hardware failure during synchronization than the
+        previous synchronization method.
+      - Made it so you can set the number of output filters for con_ layers at runtime.
+      - The way cuDNN work buffers are managed has been improved, leading to
+        less GPU RAM usage.  Therefore, users should not need to call
+        set_dnn_prefer_smallest_algorithms() anymore.
+      - Added operator&lt;&lt; for random_cropper and dnn_trainer to allow 
+        easy logging of training parameters.
+      - Made concat_ layer a lot faster.
+      - Made the dnn_trainer not forget all the previous loss values it knows
+        about when it determines that there have been a lot of steps without
+        progress and shrinks the learning rate. Instead, it removes only a
+        small amount of the oldest values.   The problem with the old way of
+        removing all the loss values in the history was that if you set the
+        steps without progress threshold to a really high number you would
+        often observe that the last few learning rate values were obviously not
+        making progress, however, since all the previous loss values were
+        forgotten the trainer needed to fully populate its loss history from
+        scratch before it would figure this out.  This new style makes the
+        trainer not waste time running this excessive optimization of obviously
+        useless mini-batches.  I also changed the default
+        get_test_iterations_without_progress_threshold() from 200 to 500.  Now
+        that we have a better history management of loss values in the trainer
+        it's much more sensible to have a larger value here.
+   - Dlib's simd classes will now use ARM NEON instructions.  This makes the
+     HOG based object detector faster on mobile devices running ARM processors.
+   - Added last_modified() method to dlib::file.  Also, added
+     select_oldest_file() and select_newest_file().
+   - Added solve_qp_box_constrained_blockdiag()
+   - Added an overload of mat() that takes a row stride value.
+   - Added cmake scripts and some related tooling that makes it easy to call
+     C++ code from java.  See dlib/java/ folder.  
+   - MATLAB MEX wrapper API
+      - Made the mex wrapper deal with cell arrays that have null elements.
+      - Made ctrl+c detection in a mex file work more reliably in newer versions of matlab.
+   - Added set_rect_area()
+   - Gave test_object_detection_function() an option to set how ignore box
+     overlap is tested.
+   - Added serialization support for the running_stats_decayed object.
+   - Additions to imglab
+      - Added --sort and also the ability to propagate boxes from one image to
+        the next using dlib::correlation_tracker.
+      - Made it so you can remove images by pressing alt+d. 
+      - Made is so pressing e in imglab toggles between views of the image
+        where the histogram is equalized or unmodified. This way, if you are
+        looking at particularly dark or badly contrasted images you can toggle
+        this mode and maybe get a better view of what you are labeling.
+   - Made the attribute_list of the xml parser a little more friendly by
+     allowing you to ask for attributes that don't exist and get a defined
+     behavior (an exception being thrown) rather than it being a contract
+     violation.
+
+Non-Backwards Compatible Changes:
+   - DNN solver objects are now required to declare operator&lt;&lt;.
+   - Broke backwards compatibility with previous dnn_trainer serialization
+     format.  The network serialization format has not changed however.  So old
+     model files will still load properly.
+   - Changed random_cropper interface.
+   - Changed the XML format output by net_to_xml(). Specifically, the XML tag
+     for affine layers was changed to use the same conventions as other layers
+     that support convolutional vs fully connected modes.
+   - Dlib's smart pointers have been deprecated and all of dlib's code has been
+     changed to use the std:: version of these smart pointers.  The old dlib
+     smart pointers are still present, allowing users to explicitly include
+     them if needed, but users should migrate to the C++11 standard version of
+     these tools. 
+   - Changed the functions that transform between input tensor coordinates and
+     output tensor coordinates to use dpoint instead of point. This way, we can
+     obtain sub-pixel coordinates if we need them.
+   - Upgraded loss_mmod_ to support objects of varying aspect ratio. This
+     changes the API for the mmod_options struct slightly.
+
+Bug fixes:
+   - Made resize_image() and functions that use it like the pyramid objects
+     produce better results when run on float and double images. There was
+     needless rounding to integers happening in the bilinear interpolation. Now
+     if you work with a float image the entire process will run without integer
+     rounding.
+   - Made the input_tensor_to_output_tensor() and output_tensor_to_input_tensor() 
+     coordinate mappings work on networks that contain skip layers.
+   - The input_rgb_image_sized is supposed to be convertible to
+     input_rgb_image, which it was in all ways except you couldn't deserialize
+     directly like you would expect. This has now been fixed.
+   - There was a bug in the concat_ layer's backward() method. It was assigning
+     the gradient to previous layers instead of adding the gradient, as required
+     by the layer interface specification.  Probably no-one has been impacted
+     by this bug, but it's still a bug and has been fixed.
+   - Changed the random_cropper so that it samples background patches uniformly
+     across scales regardless of the input image size. Previously, if you gave
+     really large images or really small images it had a bias towards giving only
+     large patches or small patches respectively.
+   - Fixed name lookup problem for calls to serialize() on network objects.
+   - Fixed double delete in tokenizer_kernel_1.
+   - Fixed error in pyramid_down&lt;2&gt; that caused the output image to be a
+     little funny looking in some cases.
+   - Fixed the visit_layers_backwards() and visit_layers_backwards_range()
+     routines so they visit layers in the correct order.
+   - Made build scripts work on a wider range of platforms and configurations.
+   - Worked around global timer cleanup issues that occur on windows when dlib
+     is used in a dll in some situations.
+   - Fixed various compiler errors in obscure environments.
+
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.4" date="Mar 07, 2017">
+New Features:
+
+Non-Backwards Compatible Changes:
+   - CMake 2.8.12 is now required to build dlib (but only if you use CMake).  
+
+Bug fixes:
+   - Fixed a slow memory leak that could occur when using cuDNN.
+
+Other:
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.3" date="Feb 21, 2017">
+New Features:
+   - Deep Learning
+      - Added a state-of-the-art face recognition tool (99.38% accuracy on the
+        LFW benchmark) with C++ and Python example programs.
+      - Added these new loss layer types: loss_metric_, loss_mean_squared_, and
+        loss_mean_squared_multioutput_.
+      - Added the l2normalize_ computational layer.
+      - Added test_one_step() to the dnn_trainer. This allows you to do
+        automatic early stopping based on observing the loss on held out data.
+      - Made the dnn_trainer automatically reload from the last good state if a
+        loss of NaN is encountered.
+      - Made alias_tensor usable when it is const.
+   - Dlib's simd classes will now use PowerPC VSX instructions.  This makes the
+     HOG based object detector faster on PowerPC machines.
+   - Added compute_roc_curve()
+   - Added find_gap_between_convex_hulls()
+   - Added serialization support for std::array.
+   - Added running_scalar_covariance_decayed object
+   - Added running_stats_decayed object
+   - Added min_pointwise() and max_pointwise().
+   - Added a 1D clustering routine: segment_number_line().
+   - Added Intel MKL FFT bindings.
+   - Added matlab_object to the mex wrapper. Now you can have parameters that
+     are arbitrary matlab objects.
+   - Added support for loading of RGBA JPEG images
+
+Non-Backwards Compatible Changes:
+   - Changed the loss layer interface to use two typedefs, output_label_type
+     and training_label_type instead of a single label_type. This way, the label
+     type used for training can be distinct from the type output by the network.
+     This change breaks backwards compatibility with the previous API.
+
+Bug fixes:
+   - Fixed compiler warnings and errors on newer compilers.
+   - Fixed a bug in the repeat layer that caused it to throw exceptions in some
+     cases.
+   - Fixed matlab crashing if an error message from a mex file used the %
+     character, since that is interpreted by matlab as part of an eventual
+     printf() code.
+   - Fixed compile time error in random_subset_selector::swap()
+   - Fixed missing implementation of map_input_to_output() and
+     map_output_to_input() in the concat_ layer.
+   - Made the dnn_trainer's detection and backtracking from situations with
+     increasing loss more robust. Now it will never get into a situation where it
+     backtracks over and over. Instead, it will only backtrack a few times in a
+     row before just letting SGD run unimpeded.
+
+Other:
+   - Usability improvements to DNN API.
+   - Improved C++11 detection, especially on OS X.
+   - Made dlib::thread_pool use std::thread and join on the threads in
+     thread_pool's destructor. The previous implementation used dlib's global
+     thread pooling to allocate threads to dlib::thread_pool, however, this
+     sometimes caused annoying behavior when used as part of a MATLAB mex file,
+     very occasionally leading to matlab crashes when mex files were unloaded.
+     This also means that dlib::thread_pool construction is a little bit slower
+     than it used to be.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.2" date="Oct 10, 2016">
+New Features:
+   - Updates to the deep learning API:
+      - Added tools for making convolutional neural network based object detectors.  See
+        dnn_mmod_ex.cpp example program.
+      - Added annotation() to tensor so you can associate any object you want with a tensor.
+      - Made layer_details() part of the SUBNET interface so that user defined layer
+        details objects can access each other. Also added the input_layer() global function
+        for accessing the input layer specifically.
+      - alias_tensor can now create aliases of const tensors.
+      - Added set_all_bn_running_stats_window_sizes().
+      - Added visit_layers_backwards(), visit_layers_backwards_range(), and
+        visit_layers_range().
+      - Computational layers can now optionally define map_input_to_output() and
+        map_output_to_input() member functions.  If all layers of a network provide these
+        functions then the new global functions input_tensor_to_output_tensor() and
+        output_tensor_to_input_tensor() can be used to map between the network's input and
+        output tensor coordinates.  This is important for fully convolutional object
+        detectors since they need to map between the image space and final feature space.
+        These new functions are important for tools like the new MMOD detector.
+      - Added input_rgb_image_pyramid.
+   - Image Processing
+      - The imglab command line tool has these new options: --min-object-size, --rmempty,
+        --rmlabel, --rm-if-overlaps, and --sort-num-objects.  I also changed the behavior of
+        --split so that it simply partitions the data and is an invertible operation.
+      - Added mmod_rect
+      - Added an overload of load_image_dataset() that outputs directly to mmod_rect
+        instead of rectangle.
+      - Added image_dataset_file::shrink_big_images(). So now load_image_dataset() can load
+        a dataset of high resolution files at a user requested lower resolution.
+      - Added box_intersection_over_union().
+      - Added create_tiled_pyramid(), image_to_tiled_pyramid(), and tiled_pyramid_to_image().
+      - Added random_cropper
+   - Upgraded dlib's mex wrapper tooling to enable easy binding of C++ classes to MATLAB
+     objects. 
+   - Added nearest_rect()
+   - Added find_upper_quantile()
+   - Added count_steps_without_decrease_robust().
+   - Added get_double_in_range() to dlib::rand.
+
+Non-Backwards Compatible Changes:
+   - C++11 is now required to use dlib.  
+   - Changed pinv() so it interprets its tol argument relative to the largest singular
+     value of the input matrix rather than as an absolute tolerance.  This should generally
+     improve results, but could change the output in some cases.
+   - Renamed the class members of test_box_overlap so they are less confusing.
+   - Updates to the deep learning API:
+      - Changed the DNN API so that sample_expansion_factor is a runtime variable rather
+        than a compile time constant. This also removes it from the input layer interface
+        since the DNN core now infers its value at runtime. Therefore, users that define their
+        own input layers don't need to specify it anymore.
+      - Changed DEFAULT_BATCH_NORM_EPS from 1e-5 to 1e-4.
+      - Changed the default batch normalization running stats window from 1000 to 100.
+
+Bug fixes:
+   - Made the relational operators constexpr so they don't accidentally cause compilation
+     errors when they get pulled into the scope of template metaprogramming expressions.
+   - Fixed all/source.cpp not compiling in some instances.
+   - CMake scripts now do a better job detecting things like C++11 support, the presence of
+     CUDA, and other system specific details that could cause the build to fail if not
+     properly configured.
+   - Fixed a bug in imglab's --cluster option where it would output xml files with empty
+     entries if the input xml file contained unannotated images.
+   - Fixed imglab's --cluster option not working with relative paths.
+
+Other:
+   - Made the thread local variables that hold the cudnn and cublas context objects not
+     destruct and recreate themselves when you switch devices.  Instead, they keep a table
+     of context objects, for each thread and device, reusing as necessary. This prevents
+     churn in the context objects when you are switching back and forth between devices
+     inside a single thread, making things run more efficiently for some CUDA based
+     workflows.
+   - Made the message argument of the DLIB_ASSERT and DLIB_CASSERT macros optional.
+   - Made thread_pool and parallel_for propagate exceptions from task threads to calling
+     code rather than killing the application if a task thread throws.
+   - Changed imglab --resample so that it never changes the aspect ratio of an image.
+   - Made the check in dnn_trainer for convergence more robust. Previously, if we
+     encountered a bad mini-batch that made the loss value suddenly jump up by a larger than
+     normal value it could make the trainer think we converged. Now the test is robust to
+     transient spikes in loss value.  Additionally, the dnn_trainer will now check if the
+     loss has been increasing before it saves the state to disk. If it detects that the loss
+     has been going up then instead of saving to disk it recalls the previously good state.
+     This way, if we hit a really bad mini-batch during training which negatively effects
+     the model in a significant way, the dnn_trainer will automatically revert back to an
+     earlier good state.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.1" date="Aug 13, 2016">
+New Features:
+   - Support for cuDNN 5.1
+   - dlib::async() and dlib::default_thread_pool().
+   - rectangle_transform
+   - imglab tool: added --resample, --ignore, --files, and --extract-chips
+     command line options.  Also added convert_imglab_paths_to_relative and
+     copy_imglab_dataset scripts.
+   - Evgeniy Fominov made the shape_predictor trainer multi-threaded and faster.
+   - sutr90 contributed support for the CIELab color space.  See the new lab_pixel.
+
+Non-Backwards Compatible Changes:
+   - All the cmake utility scripts were moved to dlib/cmake_utils.  
+   - Code that #includes the shape_predictor can now only be compiled with
+     compilers that support C++11 lambda functions.
+
+Bug fixes:
+   - Made CMake scripts work in a wider range of environments. 
+   - Fixed compile time errors on various platforms.
+   - Fixed bad multi-threading support in the MATLAB mex wrapper.
+   - Fixed bug in cuDNN binding that could sometimes cause NaN outputs.
+   - Fixed bad convergence testing in DNN tooling for very small datasets.
+
+Other:
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="19.0" date="Jun 25, 2016">
+New Features:
+   - A deep learning toolkit using CPU and/or GPU hardware.  Some major elements
+     of this are:
+      - Clean and fully documented C++11 API
+      - Clean tutorials: see dnn_introduction_ex.cpp and dnn_introduction2_ex.cpp
+      - Uses cuDNN v5.0
+      - Multi-GPU support
+      - Automatic learning rate adjustment
+      - A pretrained 1000 class Imagenet classifier (see dnn_imagenet_ex.cpp)
+   - Optimization Tools
+      - Added find_optimal_parameters()
+      - Added elastic_net class
+      - Added the option to use the elastic net regularizer to the OCA solver.
+      - Added an option to solve the L2-loss version of the SVM objective function to svm_c_linear_dcd_trainer.
+      - Added solve_qp_box_constrained()
+   - Image Processing
+      - Added random_color_transform, disturb_colors(), and apply_random_color_offset().
+      - load_image() now supports loading GIF files.
+   - Many improvements to the MATLAB binding API  
+      - Automatically link to MATLAB's Intel MKL when used on linux.
+      - struct support
+      - mex functions can have up to 20 arguments instead of 10.
+      - In place operation.  Made column major matrices directly wrap MATLAB
+        matrix objects when used inside mex files.  This way, if you use
+        matrix_colmajor or fmatrix_colmajor in a mex file it will not do any
+        unnecessary copying or transposing.
+      - Catch ctrl+c presses in MATLAB console.  Allowing early termination of mex functions.
+      - When used inside mex files, DLIB_ASSERTS won't kill the MATLAB process,
+        just throw an exception.
+      - Made cerr print in MATLAB as a red warning message.
+   - load_mnist_dataset()
+   - Added a constructor for seeding rand with a time_t.
+   - Added subm_clipped()
+   - Added unserialize.
+   - Added running_gradient
+
+Non-Backwards Compatible Changes:
+   - Everything in dlib/matlab/call_matlab.h is now in the dlib namespace.
+   - DLIB_TEST() and DLIB_TEST_MSG() macros now require you to terminate them with a ;
+
+Bug fixes:
+   - Fixed bug in 10 argument version of call_matlab() and also cleaned up a few
+     minor things.
+   - setup.py and CMake scripts work in a few more contexts.
+   - Fixed compiler errors in visual studio 2015.
+   - Fixed a bug in gaussian_blur() that caused messed up outputs when big
+     sigma values were used on some pixel types.
+   - Fixed minor bugs in join_rows() and join_cols(). They didn't work when one
+     of the matrices was empty.
+
+Other:
+   - Made CMake scripts uniformly require CMake version 2.8.4.
+   - Faster fHOG feature extraction / face detection
+   - CMake scripts now enable C++11 by default
+   - Gave array2d and matrix move constructors and move assignment operators.  Matrix
+     can also now be created from initializer lists.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="18.18" date="Oct 28, 2015">
+New Features:
+   - Added the set_ptrm() routine for assigning dlib::matrix objects to arbitrary
+     memory blocks.
+      
+Non-Backwards Compatible Changes:
+
+Bug fixes:
+   - Fixed a bug that caused cmake to not provide the correct preprocessor
+     definitions until cmake was run twice. This was causing some projects to
+     not build properly.
+
+Other:
+   - Improvements to build system:
+      - Ehsan Azarnasab contributed a setup.py so the dlib Python API can be
+        installed via the usual 'python setup.py install' command. 
+      - Séverin Lemaignan upgraded dlib's CMake scripts so they include an 
+        install target.  Now dlib can be installed system wide by executing 
+        'cmake PATH_TO_DLIB; make install'.  This also includes installing the
+        appropriate scripts for CMake's find_package(dlib) to work.
+</old>
+
+<!-- **************************************************************************************  -->
+
+<old name="18.17" date="Aug 15, 2015">
 New Features:
    - More clustering tools:
       - Added bottom_up_cluster() and find_clusters_using_angular_kmeans()
@@ -45,7 +1191,7 @@ Bug fixes:
 
 Other:
 
-</current>
+</old>
 
 <!-- **************************************************************************************  -->
 

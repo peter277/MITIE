@@ -37,6 +37,7 @@ namespace
         const double C = 0.2;
         linear_trainer.set_epsilon(1e-10);
         linear_trainer_cpa.set_epsilon(1e-10);
+        linear_trainer_cpa.set_relative_epsilon(1e-10);
 
 
         std::vector<sample_type> samples;
@@ -109,6 +110,7 @@ namespace
         const double C = 1.0;
         linear_trainer.set_epsilon(1e-10);
         linear_trainer_cpa.set_epsilon(1e-10);
+        linear_trainer_cpa.set_relative_epsilon(1e-10);
 
         linear_trainer.include_bias(false);
 
@@ -187,6 +189,7 @@ namespace
         const double C = 1;
         linear_trainer.set_epsilon(1e-10);
         linear_trainer_cpa.set_epsilon(1e-10);
+        linear_trainer_cpa.set_relative_epsilon(1e-10);
 
         std::vector<sample_type> samples;
         std::vector<double> labels;
@@ -259,6 +262,7 @@ namespace
         const double C = 1;
         linear_trainer.set_epsilon(1e-10);
         linear_trainer_cpa.set_epsilon(1e-11);
+        linear_trainer_cpa.set_relative_epsilon(1e-11);
 
         linear_trainer_cpa.force_last_weight_to_1(force_weight);
 
@@ -440,6 +444,65 @@ namespace
 
 // ----------------------------------------------------------------------------------------
 
+    void test_l2_version ()
+    {
+        typedef std::map<unsigned long,double> sample_type;
+        typedef sparse_linear_kernel<sample_type> kernel_type;
+
+        svm_c_linear_dcd_trainer<kernel_type> linear_trainer;
+        linear_trainer.set_c(10);
+        linear_trainer.set_epsilon(1e-5);
+
+        std::vector<sample_type> samples;
+        std::vector<double> labels;
+
+        // make an instance of a sample vector so we can use it below
+        sample_type sample;
+
+
+        // Now let's go into a loop and randomly generate 10000 samples.
+        double label = +1;
+        for (int i = 0; i < 1000; ++i)
+        {
+            // flip this flag
+            label *= -1;
+
+            sample.clear();
+
+            // now make a random sparse sample with at most 10 non-zero elements
+            for (int j = 0; j < 10; ++j)
+            {
+                int idx = std::rand()%100;
+                double value = static_cast<double>(std::rand())/RAND_MAX;
+
+                sample[idx] = label*value;
+            }
+
+            // Also save the samples we are generating so we can let the svm_c_linear_trainer
+            // learn from them below.  
+            samples.push_back(sample);
+            labels.push_back(label);
+        }
+
+        decision_function<kernel_type> df = linear_trainer.train(samples, labels);
+
+        sample.clear();
+        sample[4] = 0.3;
+        sample[10] = 0.9;
+        DLIB_TEST(df(sample) > 0);
+
+        sample.clear();
+        sample[83] = -0.3;
+        sample[26] = -0.9;
+        sample[58] = -0.7;
+        DLIB_TEST(df(sample) < 0);
+
+        sample.clear();
+        sample[0] = -0.2;
+        sample[9] = -0.8;
+        DLIB_TEST(df(sample) < 0);
+    }
+
     class tester_svm_c_linear_dcd : public tester
     {
     public:
@@ -474,6 +537,8 @@ namespace
             print_spinner();
             test_sparse_1_sample(-1);
             print_spinner();
+
+            test_l2_version();
         }
     } a;
 

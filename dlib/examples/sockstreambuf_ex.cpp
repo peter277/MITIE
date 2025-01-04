@@ -15,9 +15,11 @@
     http://www.jmarshall.com/easy/http/
 */
 
+#include <iostream>
+#include <memory>
+
 #include <dlib/sockets.h>
 #include <dlib/sockstreambuf.h>
-#include <iostream>
 
 using namespace std;
 using namespace dlib;
@@ -31,7 +33,7 @@ int main()
         // are using a smart pointer here to contain the connection pointer
         // returned from connect.  Doing this ensures that the connection
         // is deleted even if someone throws an exception somewhere in your code.
-        scoped_ptr<connection> con(connect("www.google.com",80));
+        std::unique_ptr<connection> con(connect("www.google.com",80));
 
 
         {
@@ -77,7 +79,7 @@ int main()
         // In any case, this function is provided to allow you to perform a graceful 
         // close if you so choose.  
         // 
-        // Also note that the timeout can be changed by suppling an optional argument 
+        // Also note that the timeout can be changed by supplying an optional argument 
         // to this function.
         close_gracefully(con);
     }

@@ -6,6 +6,7 @@
 #include "parallel_for_extension_abstract.h"
 #include "thread_pool_extension.h"
 #include "../console_progress_indicator.h"
+#include "async.h"
 
 namespace dlib
 {
@@ -186,6 +187,17 @@ namespace dlib
         parallel_for_blocked(tp, begin, end, funct, chunks_per_thread);
     }
 
+    template <typename T>
+    void parallel_for_blocked (
+        long begin,
+        long end,
+        const T& funct,
+        long chunks_per_thread = 8
+    )
+    {
+        parallel_for_blocked(default_thread_pool(), begin, end, funct, chunks_per_thread);
+    }
+
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 
@@ -286,6 +298,19 @@ namespace dlib
     }
 
 // ----------------------------------------------------------------------------------------
+
+    template <typename T>
+    void parallel_for (
+        long begin,
+        long end,
+        const T& funct,
+        long chunks_per_thread = 8
+    )
+    {
+        parallel_for(default_thread_pool(), begin, end, funct, chunks_per_thread);
+    }
+
+// ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 
     namespace impl
@@ -304,7 +329,7 @@ namespace dlib
             ~parfor_verbose_helper()
             {
                 if (wrote_to_screen)
-                    std::cout << std::endl;
+                    pbar.finish();
             }
 
             mutable long count;
@@ -339,7 +364,7 @@ namespace dlib
             ~parfor_verbose_helper3()
             {
                 if (wrote_to_screen)
-                    std::cout << std::endl;
+                    pbar.finish();
             }
 
             mutable long count;
@@ -373,7 +398,7 @@ namespace dlib
             ~parfor_verbose_helper2()
             {
                 if (wrote_to_screen)
-                    std::cout << std::endl;
+                    pbar.finish();
             }
 
             mutable long count;
@@ -502,6 +527,29 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T>
+    void parallel_for_verbose (
+        long begin,
+        long end,
+        const T& funct,
+        long chunks_per_thread = 8
+    )
+    {
+        // make sure requires clause is not broken
+        DLIB_ASSERT(begin <= end && chunks_per_thread > 0,
+            "\t void parallel_for_verbose()"
+            << "\n\t Invalid inputs were given to this function"
+            << "\n\t begin: " << begin 
+            << "\n\t end:   " << end
+            << "\n\t chunks_per_thread: " << chunks_per_thread
+            );
+
+        impl::parfor_verbose_helper2<T> helper(funct, begin, end);
+        parallel_for(begin, end, helper, chunks_per_thread);
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    template <typename T>
     void parallel_for_blocked_verbose (
         thread_pool& tp,
         long begin,
@@ -595,6 +643,29 @@ namespace dlib
 
         impl::parfor_verbose_helper2<T> helper(funct, begin, end);
         parallel_for_blocked(num_threads, begin, end, helper, chunks_per_thread);
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    template <typename T>
+    void parallel_for_blocked_verbose (
+        long begin,
+        long end,
+        const T& funct,
+        long chunks_per_thread = 8
+    )
+    {
+        // make sure requires clause is not broken
+        DLIB_ASSERT(begin <= end && chunks_per_thread > 0,
+            "\t void parallel_for_blocked_verbose()"
+            << "\n\t Invalid inputs were given to this function"
+            << "\n\t begin: " << begin 
+            << "\n\t end:   " << end
+            << "\n\t chunks_per_thread: " << chunks_per_thread
+            );
+
+        impl::parfor_verbose_helper2<T> helper(funct, begin, end);
+        parallel_for_blocked(begin, end, helper, chunks_per_thread);
     }
 
 // ----------------------------------------------------------------------------------------

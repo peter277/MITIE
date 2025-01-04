@@ -7,7 +7,6 @@
    <!-- ************************************************************************* -->
 
    <body>
-         <br/><br/>
          <p>
             This page documents the core linear algebra tools included in dlib.
             In particular, the three most important objects in this part of the library are the
@@ -164,6 +163,10 @@
                   <name>tanh</name>
                   <link>dlib/matrix/matrix_math_functions_abstract.h.html#tanh</link>
                </item>
+               <item>
+                  <name>soft_max</name>
+                  <link>dlib/matrix/matrix_math_functions_abstract.h.html#soft_max</link>
+               </item>
             </sub>
          </item>
          <item nolink="true">
@@ -301,12 +304,20 @@
                   <link>dlib/matrix/matrix_subexp_abstract.h.html#subm</link>
                </item>
                <item>
+                  <name>subm_clipped</name>
+                  <link>dlib/matrix/matrix_subexp_abstract.h.html#subm_clipped</link>
+               </item>
+               <item>
                   <name>rowm</name>
                   <link>dlib/matrix/matrix_subexp_abstract.h.html#rowm</link>
                </item>
                <item>
                   <name>colm</name>
                   <link>dlib/matrix/matrix_subexp_abstract.h.html#colm</link>
+               </item>
+               <item>
+                  <name>set_ptrm</name>
+                  <link>dlib/matrix/matrix_subexp_abstract.h.html#set_ptrm</link>
                </item>
                <item>
                   <name>set_subm</name>
@@ -403,6 +414,10 @@
             <name>Other Utilities</name>
             <sub>
                <item>
+                  <name>csv</name>
+                  <link>dlib/matrix/matrix_abstract.h.html#csv</link>
+               </item>
+               <item>
                   <name>fft</name>
                   <link>dlib/matrix/matrix_fft_abstract.h.html#fft</link>
                </item>
@@ -445,6 +460,10 @@
                <item>
                   <name>conv_valid</name>
                   <link>dlib/matrix/matrix_conv_abstract.h.html#conv_valid</link>
+               </item>
+               <item>
+                  <name>xcorr_fft</name>
+                  <link>dlib/matrix/matrix_conv_abstract.h.html#xcorr_fft</link>
                </item>
                <item>
                   <name>xcorr</name>
@@ -535,6 +554,10 @@
                   <link>dlib/matrix/matrix_utilities_abstract.h.html#pointwise_multiply</link>
                </item>
                <item>
+                  <name>pointwise_pow</name>
+                  <link>dlib/matrix/matrix_utilities_abstract.h.html#pointwise_pow</link>
+               </item>
+               <item>
                   <name>join_rows</name>
                   <link>dlib/matrix/matrix_utilities_abstract.h.html#join_rows</link>
                </item>
@@ -602,6 +625,7 @@
          <item>drectangle</item> 
          <item>vector</item> 
          <item>point</item> 
+         <item>dpoint</item> 
          <item>rotate_point</item> 
          <item>rotate_around_x</item> 
          <item>rotate_around_y</item> 
@@ -610,6 +634,7 @@
          <item>point_transform</item> 
          <item>camera_transform</item> 
          <item>point_transform_affine</item> 
+         <item>rectangle_transform</item> 
          <item>point_transform_affine3d</item> 
          <item>find_affine_transform</item> 
          <item>find_similarity_transform</item> 
@@ -618,7 +643,12 @@
          <item>rotation_matrix</item> 
          <item>get_rect</item> 
          <item>centered_rect</item> 
+         <item>
+            <name>centered_rects</name>
+            <link>dlib/geometry/rectangle_abstract.h.html#centered_rects</link>
+         </item> 
          <item>set_aspect_ratio</item> 
+         <item>set_rect_area</item> 
          <item>center</item> 
          <item>dcenter</item> 
          <item>shrink_rect</item> 
@@ -630,9 +660,22 @@
          <item>resize_rect_height</item> 
          <item>move_rect</item> 
          <item>nearest_point</item> 
+         <item>nearest_rect</item> 
          <item>distance_to_rect_edge</item> 
          <item>clip_line_to_rectangle</item> 
          <item>distance_to_line</item> 
+
+         <item>line</item> 
+         <item>signed_distance_to_line</item> 
+         <item>reverse</item> 
+         <item>intersect</item> 
+         <item>count_points_on_side_of_line</item> 
+         <item>count_points_between_lines</item> 
+         <item>angle_between_lines</item> 
+         <item>is_convex_quadrilateral</item> 
+         <item>find_convex_quadrilateral</item> 
+         <item>polygon_area</item> 
+         <item>polygon</item> 
       </section>
 
 
@@ -720,6 +763,117 @@
    <components>
    
    <!-- ************************************************************************* -->
+
+      <component>
+         <name>line</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This object represents a line in the 2D plane.  The line is defined by two
+            <a href="#dpoint">points</a> running through it.  This object also includes a
+            unit normal vector that is perpendicular to the line.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>signed_distance_to_line</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This function returns how far a point is from a <a href="#line">line</a>.
+            This is a signed distance.  The sign indicates which side of the line the point
+            is on and the magnitude is the distance.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>reverse</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This function returns a <a href="#line">line</a> object that represents the
+            same line but with the endpoints and normal vector flipped.  
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>intersect</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This routine finds the point at the intersection of two <a href="#line">lines</a>.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>count_points_on_side_of_line</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This routine takes a <a href="#line">line</a> and an array of points and counts how many
+            points are on one side of the line.  Which side of the line is of interest is
+            selected by the user.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>count_points_between_lines</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This routine takes a pair of <a href="#line">lines</a> and an array of points
+            and counts how many points are between the lines. 
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>angle_between_lines</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This routine returns the angle, in degrees, between two <a
+            href="#line">lines</a>.  This is a number in the range [0 90].
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>is_convex_quadrilateral</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/vector_abstract.h</spec_file>
+         <description>
+            This routine tests if 4 points define a convex quadrilateral.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>find_convex_quadrilateral</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
+         <description>
+            This routine takes 4 <a href="#line">lines</a> as input and determines if their
+            intersections form a convex quadrilateral.  If so it returns the 4 corners of
+            this quadrilateral.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+
 
       <component>
          <name>sparse_to_dense</name>
@@ -859,6 +1013,19 @@
    <!-- ************************************************************************* -->
 
       <component>
+         <name>nearest_rect</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
+         <description>        
+            This function takes a std::vector&lt;<a href="#rectangle">rectangle</a>&gt; and a 
+            <a href="#point">point</a> and identifies the rectangle that is nearest to the point.
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
          <name>distance_to_rect_edge</name>
          <file>dlib/geometry.h</file>
          <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
@@ -875,7 +1042,7 @@
       <component>
          <name>distance_to_line</name>
          <file>dlib/geometry.h</file>
-         <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
+         <spec_file link="true">dlib/geometry/line_abstract.h</spec_file>
          <description>        
             This function takes a line and a <a href="#point">point</a>
             and returns the distance from the line to the point.  
@@ -1022,6 +1189,19 @@
    <!-- ************************************************************************* -->
 
       <component>
+         <name>set_rect_area</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
+         <description>        
+            This function reshapes a <a href="#rectangle">rectangle</a> so that
+            it has a user specified area.
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
          <name>shrink_rect</name>
          <file>dlib/geometry.h</file>
          <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
@@ -1095,6 +1275,19 @@
             This is an object that applies a 2D affine transformation to a <a href="#vector">vector</a> or 
             <a href="#point">point</a>.  Note that you can use <a href="#find_affine_transform">find_affine_transform</a>
             to easily create affine transforms from sets of point correspondences.
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>rectangle_transform</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This is an object that applies a <a href="#point_transform_affine">2D affine transformation</a> 
+            to a <a href="#rectangle">rectangle</a> or <a href="#drectangle">drectangle</a>.  
          </description>
                                  
       </component>
@@ -1181,6 +1374,29 @@
             that maps between them.
          </description>
                                  
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>polygon_area</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/vector_abstract.h</spec_file>
+         <description>        
+            When given a set of points defining the vertices of a polygon this routine
+            returns the area of the polygon.
+         </description>
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>polygon</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/polygon_abstract.h</spec_file>
+         <description>        
+            This class represents a polygon in a 2D coordinate system.
+         </description>
       </component>
 
    <!-- ************************************************************************* -->
@@ -1310,6 +1526,19 @@
                This object represents a point inside a Cartesian coordinate system.
                Note that a point is simply a typedef for a <a href="#vector">vector</a>
                that is 2D and uses longs to represent coordinate values.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>dpoint</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/vector_abstract.h</spec_file>
+         <description>
+               This object represents a point inside a Cartesian coordinate system.
+               Note that a dpoint is simply a typedef for a <a href="#vector">vector</a>
+               that is 2D and uses doubles to represent coordinate values.
          </description>
       </component>
       

@@ -21,6 +21,12 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
+    bool directory_exists (
+        const std::string& dirname
+    );
+
+// ----------------------------------------------------------------------------------------
+
     namespace implementation_details
     {
         void get_all_sub_dirs (
@@ -144,6 +150,20 @@ namespace dlib
 
     directory get_parent_directory (
         const file& f
+    );
+
+// ----------------------------------------------------------------------------------------
+
+    std::string select_oldest_file (
+        const std::string& filename1,
+        const std::string& filename2
+    );
+
+// ----------------------------------------------------------------------------------------
+
+    std::string select_newest_file (
+        const std::string& filename1,
+        const std::string& filename2
     );
 
 // ----------------------------------------------------------------------------------------

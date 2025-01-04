@@ -49,7 +49,7 @@ namespace dlib
        
         public:
 
-            // These typedefs are here for backwards compatibily with previous versions of
+            // These typedefs are here for backwards compatibly with previous versions of
             // dlib.
             typedef xml_parser kernel_1a;
             typedef xml_parser kernel_1a_c;
@@ -103,7 +103,10 @@ namespace dlib
                     const std::string& key
                 ) const
                 {
-                    return list[key];
+                    if (is_in_list(key))
+                        return list[key];
+                    else
+                        throw xml_attribute_list_error("No XML attribute named " + key + " is present in tag.");
                 }
 
                 bool at_start (
@@ -124,7 +127,7 @@ namespace dlib
                 bool move_next (
                 ) const { return list.move_next(); }
 
-                unsigned long size (
+                size_t size (
                 ) const { return list.size(); }
             };
 
@@ -354,6 +357,7 @@ namespace dlib
 
 
                 case empty_element: is_empty = true;
+                                    // fall through
                 case element_start:
                     {
                         seen_root_tag = true;
@@ -1206,10 +1210,13 @@ namespace dlib
         target.erase();
         data.erase();
 
+        if (token.size() < 3) return -1;
+
         std::istream::int_type ch = token[2];
         std::string::size_type i = 3;
         while (ch != ' ' && ch != '?' && ch != '\t' && ch != '\n' && ch!='\r')
         {
+            if (i >= token.size()) return -1;
             target += ch;
             ch = token[i];
             ++i;
@@ -1220,6 +1227,7 @@ namespace dlib
         // if we aren't at a ? character then go to the next character
         if (ch != '?' )
         {
+            if (i >= token.size()) return -1;
             ch = token[i];
             ++i;
         }
@@ -1229,6 +1237,7 @@ namespace dlib
         while (ch != '?')
         {
             data += ch;
+            if (i >= token.size()) return -1;
             ch = token[i];
             ++i;
         }

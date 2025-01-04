@@ -367,6 +367,41 @@ namespace
             }
         }
 
+        {
+            const rectangle input(1,1,6,4); 
+            const rectangle output = set_rect_area(input,4*input.area());
+            DLIB_TEST(output.area() == 4*input.area());
+            DLIB_TEST(output.width() == 2*input.width());
+            DLIB_TEST(output.height() == 2*input.height());
+
+            const auto input_center = center(input);
+            const auto output_center = center(output);
+            DLIB_TEST(std::abs(input_center.x() - output_center.x()) <= 1);
+            DLIB_TEST(std::abs(input_center.y() - output_center.y()) <= 1);
+        }
+
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    void test_find_convex_hull()
+    {
+        print_spinner();
+        std::vector<dpoint> points{
+            { 0.0, 0.0 },
+            { 1.0, 1.0 },
+            { 2.0, 2.0 },
+            { 3.0, 1.0 },
+            { 4.0, 0.0 },
+            { 2.0, 4.0 },
+            { 1.0, 3.0 },
+        };
+        const auto hull = find_convex_hull(points);
+        DLIB_TEST(hull.size() == 4);
+        DLIB_TEST(hull[0] == dpoint(0, 0));
+        DLIB_TEST(hull[1] == dpoint(1, 3));
+        DLIB_TEST(hull[2] == dpoint(2, 4));
+        DLIB_TEST(hull[3] == dpoint(4, 0));
     }
 
 // ----------------------------------------------------------------------------------------
@@ -849,6 +884,73 @@ namespace
     }
 
 // ----------------------------------------------------------------------------------------
+    
+    void test_line()
+    {
+        print_spinner();
+        line l1(point(0,1),point(1,0));
+        line l2(point(0,0),point(1,1));
+
+        DLIB_TEST(length(intersect(l1,l2) - dpoint(0.5,0.5)) < 1e-12);
+
+        DLIB_TEST(std::abs(distance_to_line(l1, l1.p1())) < 1e-12);
+
+        DLIB_TEST(std::abs(distance_to_line(l1, dpoint(0,0)) - sqrt(0.5)) < 1e-12);
+        DLIB_TEST(std::abs(distance_to_line(l1, dpoint(1,1)) - sqrt(0.5)) < 1e-12);
+
+        DLIB_TEST(std::abs(signed_distance_to_line(l1, dpoint(0,0)) + sqrt(0.5)) < 1e-12);
+        DLIB_TEST(std::abs(signed_distance_to_line(l1, dpoint(1,1)) - sqrt(0.5)) < 1e-12);
+        DLIB_TEST(std::abs(signed_distance_to_line(reverse(l1), dpoint(1,1)) + sqrt(0.5)) < 1e-12);
+
+
+        dpoint reference_point(0.7,0.5);
+        std::vector<dpoint> pts = {dpoint(0.01,0), dpoint(1,0.5), dpoint(0.9, 0.3), dpoint(0.4, 2), dpoint(1.3, 0.9)};
+
+
+        DLIB_TEST(count_points_between_lines(l1,l2,reference_point,pts) == 3);
+        DLIB_TEST(count_points_on_side_of_line(l1,reference_point,pts) == 4);
+
+        reference_point = dpoint(0,0.5);
+        DLIB_TEST(count_points_between_lines(l1,l2,reference_point,pts) == 0);
+        DLIB_TEST(count_points_on_side_of_line(l1,reference_point,pts) == 1);
+
+
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    void test_polygon()
+    {
+        print_spinner();
+        /* Let's define this triangle
+         * 0 . . . . . . . . . . .
+         * 1   . . . . . . . . .
+         * 2     . . . . . . .
+         * 3       . . . . .
+         * 4         . . .
+         * 5           .
+         *   0 1 2 3 4 5 6 7 8 9 10
+         */
+
+        const polygon triangle({{0, 0}, {5, 5}, {10, 0}});
+        DLIB_TEST(triangle.area() == 25);
+
+        const rectangle rect = triangle.get_rect();
+        std::vector<double> left_boundary;
+        std::vector<double> right_boundary;
+        triangle.get_left_and_right_bounds(rect.top(), rect.bottom(), left_boundary, right_boundary);
+
+        DLIB_TEST(left_boundary.size() == right_boundary.size());
+
+        const long top = rect.top();
+        const long bottom = rect.bottom();
+        for (long y = top, i = 0; y <= bottom; ++y, ++i)
+            DLIB_TEST(left_boundary[y - top] == i);
+        for (long y = top, i = 10; y <= bottom; ++y, --i)
+            DLIB_TEST(right_boundary[y - top] == i);
+    }
+
+// ----------------------------------------------------------------------------------------
 
     class geometry_tester : public tester
     {
@@ -874,6 +976,9 @@ namespace
             test_find_similarity_transform2<double>(); 
             test_find_similarity_transform<float>(); 
             test_find_similarity_transform2<float>(); 
+            test_line();
+            test_polygon();
+            test_find_convex_hull();
         }
     } a;
 

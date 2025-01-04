@@ -35,7 +35,7 @@ namespace dlib
 
         void clear()
         {
-            sum = 0;
+            sum_     = 0;
             sum_sqr  = 0;
             sum_cub  = 0;
             sum_four = 0;
@@ -49,7 +49,7 @@ namespace dlib
             const T& val
         )
         {
-            sum      += val;
+            sum_     += val;
             sum_sqr  += val*val;
             sum_cub  += cubed(val);
             sum_four += quaded(val);
@@ -68,11 +68,17 @@ namespace dlib
             return n;
         }
 
+        T sum (
+        ) const
+        {
+            return sum_;
+        }
+
         T mean (
         ) const
         {
             if (n != 0)
-                return sum/n;
+                return sum_/n;
             else
                 return 0;
         }
@@ -114,7 +120,7 @@ namespace dlib
                 );
 
             T temp = 1/(n-1);
-            temp = temp*(sum_sqr - sum*sum/n);
+            temp = temp*(sum_sqr - sum_*sum_/n);
             // make sure the variance is never negative.  This might
             // happen due to numerical errors.
             if (temp >= 0)
@@ -148,8 +154,8 @@ namespace dlib
 
             T temp  = 1/n;
             T temp1 = std::sqrt(n*(n-1))/(n-2); 
-            temp    = temp1*temp*(sum_cub - 3*sum_sqr*sum*temp + 2*cubed(sum)*temp*temp)/
-                      (std::sqrt(std::pow(temp*(sum_sqr-sum*sum*temp),3)));
+            temp    = temp1*temp*(sum_cub - 3*sum_sqr*sum_*temp + 2*cubed(sum_)*temp*temp)/
+                      (std::sqrt(std::pow(temp*(sum_sqr-sum_*sum_*temp),3)));
 
             return temp; 
         }
@@ -165,9 +171,9 @@ namespace dlib
             );
 
             T temp = 1/n;
-            T m4   = temp*(sum_four - 4*sum_cub*sum*temp+6*sum_sqr*sum*sum*temp*temp
-                     -3*quaded(sum)*cubed(temp));
-            T m2   = temp*(sum_sqr-sum*sum*temp);
+            T m4   = temp*(sum_four - 4*sum_cub*sum_*temp+6*sum_sqr*sum_*sum_*temp*temp
+                     -3*quaded(sum_)*cubed(temp));
+            T m2   = temp*(sum_sqr-sum_*sum_*temp);
             temp   = (n-1)*((n+1)*m4/(m2*m2)-3*(n-1))/((n-2)*(n-3));
 
             return temp; 
@@ -192,7 +198,7 @@ namespace dlib
         {
             running_stats temp(*this);
 
-            temp.sum += rhs.sum;
+            temp.sum_ += rhs.sum_;
             temp.sum_sqr += rhs.sum_sqr;
             temp.sum_cub += rhs.sum_cub;
             temp.sum_four += rhs.sum_four;
@@ -215,7 +221,7 @@ namespace dlib
         ); 
 
     private:
-        T sum;
+        T sum_;
         T sum_sqr;
         T sum_cub;
         T sum_four;
@@ -236,7 +242,7 @@ namespace dlib
         int version = 2;
         serialize(version, out);
 
-        serialize(item.sum, out);
+        serialize(item.sum_, out);
         serialize(item.sum_sqr, out);
         serialize(item.sum_cub, out);
         serialize(item.sum_four, out);
@@ -256,7 +262,7 @@ namespace dlib
         if (version != 2)
             throw dlib::serialization_error("Unexpected version number found while deserializing dlib::running_stats object.");
 
-        deserialize(item.sum, in);
+        deserialize(item.sum_, in);
         deserialize(item.sum_sqr, in);
         deserialize(item.sum_cub, in);
         deserialize(item.sum_four, in);
@@ -449,6 +455,331 @@ namespace dlib
         T sum_yy;
         T n;
     };
+
+// ----------------------------------------------------------------------------------------
+
+    template <
+        typename T
+        >
+    class running_scalar_covariance_decayed
+    {
+    public:
+
+        explicit running_scalar_covariance_decayed(
+            T decay_halflife = 1000 
+        )
+        {
+            DLIB_ASSERT(decay_halflife > 0);
+
+            sum_xy = 0;
+            sum_x = 0;
+            sum_y = 0;
+            sum_xx = 0;
+            sum_yy = 0;
+            forget = std::pow(0.5, 1/decay_halflife);
+            n = 0;
+
+            COMPILE_TIME_ASSERT ((
+                    is_same_type<float,T>::value ||
+                    is_same_type<double,T>::value ||
+                    is_same_type<long double,T>::value 
+            ));
+        }
+
+        T forget_factor (
+        ) const 
+        { 
+            return forget; 
+        }
+
+        void add (
+            const T& x,
+            const T& y
+        )
+        {
+            sum_xy = sum_xy*forget + x*y;
+
+            sum_xx = sum_xx*forget + x*x;
+            sum_yy = sum_yy*forget + y*y;
+
+            sum_x  = sum_x*forget + x;
+            sum_y  = sum_y*forget + y;
+
+            n = n*forget + 1;
+        }
+
+        T current_n (
+        ) const
+        {
+            return n;
+        }
+
+        T mean_x (
+        ) const
+        {
+            if (n != 0)
+                return sum_x/n;
+            else
+                return 0;
+        }
+
+        T mean_y (
+        ) const
+        {
+            if (n != 0)
+                return sum_y/n;
+            else
+                return 0;
+        }
+
+        T covariance (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_scalar_covariance_decayed::covariance()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            return 1/(n-1) * (sum_xy - sum_y*sum_x/n);
+        }
+
+        T correlation (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_scalar_covariance_decayed::correlation()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            T temp = std::sqrt(variance_x()*variance_y());
+            if (temp != 0)
+                return covariance() / temp;
+            else
+                return 0; // just say it's zero if there isn't any variance in x or y.
+        }
+
+        T variance_x (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_scalar_covariance_decayed::variance_x()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            T temp = 1/(n-1) * (sum_xx - sum_x*sum_x/n);
+            // make sure the variance is never negative.  This might
+            // happen due to numerical errors.
+            if (temp >= 0)
+                return temp;
+            else
+                return 0;
+        }
+
+        T variance_y (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_scalar_covariance_decayed::variance_y()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            T temp = 1/(n-1) * (sum_yy - sum_y*sum_y/n);
+            // make sure the variance is never negative.  This might
+            // happen due to numerical errors.
+            if (temp >= 0)
+                return temp;
+            else
+                return 0;
+        }
+
+        T stddev_x (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_scalar_covariance_decayed::stddev_x()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            return std::sqrt(variance_x());
+        }
+
+        T stddev_y (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_scalar_covariance_decayed::stddev_y()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            return std::sqrt(variance_y());
+        }
+
+    private:
+
+        T sum_xy;
+        T sum_x;
+        T sum_y;
+        T sum_xx;
+        T sum_yy;
+        T n;
+        T forget;
+    };
+
+// ----------------------------------------------------------------------------------------
+
+    template <
+        typename T
+        >
+    class running_stats_decayed
+    {
+    public:
+
+        explicit running_stats_decayed(
+            T decay_halflife = 1000 
+        )
+        {
+            DLIB_ASSERT(decay_halflife > 0);
+
+            sum_x = 0;
+            sum_xx = 0;
+            forget = std::pow(0.5, 1/decay_halflife);
+            n = 0;
+
+            COMPILE_TIME_ASSERT ((
+                    is_same_type<float,T>::value ||
+                    is_same_type<double,T>::value ||
+                    is_same_type<long double,T>::value 
+            ));
+        }
+
+        T forget_factor (
+        ) const 
+        { 
+            return forget; 
+        }
+
+        void add (
+            const T& x
+        )
+        {
+
+            sum_xx = sum_xx*forget + x*x;
+
+            sum_x  = sum_x*forget + x;
+
+            n = n*forget + 1;
+        }
+
+        T current_n (
+        ) const
+        {
+            return n;
+        }
+
+        T mean (
+        ) const
+        {
+            if (n != 0)
+                return sum_x/n;
+            else
+                return 0;
+        }
+
+        T variance (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_stats_decayed::variance()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            T temp = 1/(n-1) * (sum_xx - sum_x*sum_x/n);
+            // make sure the variance is never negative.  This might
+            // happen due to numerical errors.
+            if (temp >= 0)
+                return temp;
+            else
+                return 0;
+        }
+
+        T stddev (
+        ) const
+        {
+            // make sure requires clause is not broken
+            DLIB_ASSERT(current_n() > 1,
+                "\tT running_stats_decayed::stddev()"
+                << "\n\tyou have to add some numbers to this object first"
+                << "\n\tthis: " << this
+                );
+
+            return std::sqrt(variance());
+        }
+
+        template <typename U>
+        friend void serialize (
+            const running_stats_decayed<U>& item, 
+            std::ostream& out 
+        );
+
+        template <typename U>
+        friend void deserialize (
+            running_stats_decayed<U>& item, 
+            std::istream& in
+        ); 
+
+    private:
+
+        T sum_x;
+        T sum_xx;
+        T n;
+        T forget;
+    };
+
+    template <typename T>
+    void serialize (
+        const running_stats_decayed<T>& item, 
+        std::ostream& out 
+    )
+    {
+        int version = 1;
+        serialize(version, out);
+
+        serialize(item.sum_x, out);
+        serialize(item.sum_xx, out);
+        serialize(item.n, out);
+        serialize(item.forget, out);
+    }
+
+    template <typename T>
+    void deserialize (
+        running_stats_decayed<T>& item, 
+        std::istream& in
+    ) 
+    {
+        int version = 0;
+        deserialize(version, in);
+        if (version != 1)
+            throw dlib::serialization_error("Unexpected version number found while deserializing dlib::running_stats_decayed object.");
+
+        deserialize(item.sum_x, in);
+        deserialize(item.sum_xx, in);
+        deserialize(item.n, in);
+        deserialize(item.forget, in);
+    }
 
 // ----------------------------------------------------------------------------------------
 
@@ -1491,6 +1822,70 @@ namespace dlib
         serialize(item.m, out);
         serialize(item.sd, out);
         serialize(item.pca, out);
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    inline double binomial_random_vars_are_different (
+        uint64_t k1,
+        uint64_t n1,
+        uint64_t k2,
+        uint64_t n2
+    )
+    {
+        DLIB_ASSERT(k1 <= n1, "k1: "<< k1 << "  n1: "<< n1);
+        DLIB_ASSERT(k2 <= n2, "k2: "<< k2 << "  n2: "<< n2);
+
+        const double p1 = k1/(double)n1;
+        const double p2 = k2/(double)n2;
+        const double p = (k1+k2)/(double)(n1+n2);
+
+        auto ll = [](double p, uint64_t k, uint64_t n) {      
+            if (p == 0 || p == 1)
+                return 0.0;
+            return k*std::log(p) + (n-k)*std::log(1-p);
+        };
+
+        auto logll = ll(p1,k1,n1) + ll(p2,k2,n2) - ll(p,k1,n1) - ll(p,k2,n2); 
+
+        // The basic statistic only tells you if the random variables are different.  But
+        // it's nice to know which way they are different, i.e., which one is bigger.  So
+        // stuff that information into the sign bit of the return value.
+        if (p1>=p2)
+            return logll;
+        else
+            return -logll;
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    inline double event_correlation (
+        uint64_t A_count,
+        uint64_t B_count,
+        uint64_t AB_count,
+        uint64_t total_num_observations
+    )
+    {
+        DLIB_ASSERT(AB_count <= A_count && A_count <= total_num_observations,
+            "AB_count: " << AB_count << ", A_count: "<< A_count << ", total_num_observations: " << total_num_observations);
+        DLIB_ASSERT(AB_count <= B_count && B_count <= total_num_observations,
+            "AB_count: " << AB_count << ", B_count: "<< B_count << ", total_num_observations: " << total_num_observations);
+
+        if (total_num_observations == 0)
+            return 0;
+
+        DLIB_ASSERT(A_count + B_count - AB_count <= total_num_observations,
+            "AB_count: " << AB_count << " A_count: " << A_count <<  ", B_count: "<< B_count << ", total_num_observations: " << total_num_observations);
+
+
+        const auto AnotB_count = A_count - AB_count;
+        const auto notB_count = total_num_observations - B_count;
+        // How likely is it that the odds of A happening is different when conditioned on
+        // whether or not B happened?
+        return binomial_random_vars_are_different( 
+            AB_count, B_count,      // A conditional on the presence of B
+            AnotB_count, notB_count // A conditional on the absence of B 
+        );
     }
 
 // ----------------------------------------------------------------------------------------
