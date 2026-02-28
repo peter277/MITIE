@@ -1,1 +1,13 @@
-git subtree pull --prefix dlib https://github.com/davisking/dlib.git master --squash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+DLIB_LATEST_TAG=$(
+  git ls-remote --tags --refs --sort="v:refname" https://github.com/davisking/dlib.git |
+  tail -n1 |
+  while read -r _ dlib_ref; do
+    echo "${dlib_ref##*/}"
+  done
+)
+
+git subtree pull --prefix dlib https://github.com/davisking/dlib.git $DLIB_LATEST_TAG --squash
