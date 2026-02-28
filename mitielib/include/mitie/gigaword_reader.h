@@ -4,9 +4,9 @@
 #ifndef MIT_LL_GIGAWoRD_READER_H_
 #define MIT_LL_GIGAWoRD_READER_H_
 
-#include "dlib/xml_parser.h"
-#include "dlib/string.h"
-#include "dlib/dir_nav.h"
+#include <dlib/xml_parser.h>
+#include <dlib/string.h>
+#include <dlib/dir_nav.h>
 #include <list>
 #include <fstream>
 
