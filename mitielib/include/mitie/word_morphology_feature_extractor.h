@@ -5,7 +5,7 @@
 #define MIT_LL_WORD_MORPHOLOGY_FEATURE_ExTRACTOR_H_
 
 #include <mitie/mitie_api_prefix.h>
-#include <mitie/approximate_substring_set.h>
+#include "approximate_substring_set.h"
 #include <dlib/matrix.h>
 
 namespace mitie

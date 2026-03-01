@@ -5,12 +5,12 @@
 #define MIT_LL_CoUNT_MIN_SKETCH_H_
 
 #include <mitie/mitie_api_prefix.h>
-#include <dlib/array2d.h>
-#include <dlib/uintn.h>
-#include <dlib/hash.h>
-#include <dlib/byte_orderer.h>
+#include "dlib/array2d.h"
+#include "dlib/uintn.h"
+#include "dlib/hash.h"
+#include "dlib/byte_orderer.h"
 #include <queue>
-#include <dlib/image_transforms.h>
+#include "dlib/image_transforms.h"
 
 namespace mitie
 {

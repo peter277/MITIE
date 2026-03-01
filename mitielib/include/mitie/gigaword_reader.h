@@ -5,9 +5,9 @@
 #define MIT_LL_GIGAWoRD_READER_H_
 
 #include <mitie/mitie_api_prefix.h>
-#include <dlib/xml_parser.h>
-#include <dlib/string.h>
-#include <dlib/dir_nav.h>
+#include "dlib/xml_parser.h"
+#include "dlib/string.h"
+#include "dlib/dir_nav.h"
 #include <list>
 #include <fstream>
 

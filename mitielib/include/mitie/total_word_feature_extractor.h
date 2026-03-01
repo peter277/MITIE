@@ -6,7 +6,7 @@
 
 #include <mitie/mitie_api_prefix.h>
 #include <map>
-#include <mitie/word_morphology_feature_extractor.h>
+#include "word_morphology_feature_extractor.h"
 #include <dlib/statistics.h>
 #include <dlib/vectorstream.h>
 #include <dlib/hash.h>
